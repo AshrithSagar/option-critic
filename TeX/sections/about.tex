@@ -1,0 +1,63 @@
+\section*{About | Option-critic}
+
+\( \Omega \to \) Set of all Markov options
+
+\( \omega \to \) A Markov option.\@ \( \omega = (\mathcal{I}_\omega, \pi_\omega, \beta_\omega) \in \Omega \)
+
+\( \mathcal{I}_\omega \to \) Initiation set.\@ \( \mathcal{I}_\omega \subseteq \mathcal{S} \)
+
+\( \pi_\omega \to \) Intra-option policy.\@ \( \pi_\omega: \mathcal{S} \times \mathcal{A} \to [0, 1] \)
+
+\( \beta_\omega \to \) Termination function.\@ \( \beta_\omega: \mathcal{S} \to [0, 1] \)
+
+\textbf{Assumption:} All options are available everywhere.\@ \( \forall s \in S, \forall \omega \in \Omega: s \in \mathcal{I}_\omega \)
+
+\( V_\Omega(s) \to \) Value function over options.\@ \( V_\Omega: \mathcal{S} \to \mathbb{R} \)
+
+\( Q_\Omega(s, \omega) \to \) Option-value function.\@ \( Q_\Omega: \mathcal{S} \times \Omega \to \mathbb{R} \)
+
+\( Q_U(s, \omega, a) \to \) Value of executing an action in the context of a state-option pair.\@ \( Q_U: \mathcal{S} \times \Omega \times \mathcal{A} \to \mathbb{R} \)
+
+\( U(\omega, s') \to \) Option-value function upon arrival.\@ \( U: \Omega \times \mathcal{S} \to \mathbb{R} \)
+
+\textbf{Parameterisation:}
+
+\( \pi_{\omega, \theta}(a \mid s) \to \) Intra-option policy of option \( \omega \) parameterised by \( \theta \).
+One such parameterisation is
+\begin{equation}
+    \pi_{\theta, \omega}(a \mid s)
+    =
+    \frac{\exp(\theta_\omega^T \phi_\omega(s, a))}{\sum_{a'} \exp(\theta_\omega^T \phi_\omega(s, a'))}
+    , \quad
+    \phi_\omega(s, a)
+    \to
+    \text{Feature vector for } s, a
+    , \quad
+    \theta_\omega
+    \to
+    \text{Parameter vector for } \omega
+\end{equation}
+\( \beta_{\omega, \vartheta}(s) \to \) Termination function of option \( \omega \) parameterised by \( \vartheta \).
+
+\textbf{Objective:} Goal is to learn options that maximise the expected return in the current task.
+\begin{align}
+    Q_\Omega(s, \omega)
+     & =
+    \sum_{a} \pi_{\theta, \omega}(a \mid s) \ Q_U(s, \omega, a)
+    \\
+    Q_U(s, \omega, a)
+     & =
+    r(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \ U(\omega, s')
+    \\
+    U(\omega, s')
+     & =
+    \big( 1 - \beta_{\omega, \vartheta}(s') \big) \, Q_\Omega(s', \omega) + \beta_{\omega, \vartheta}(s') \, V_\Omega(s')
+\end{align}
+
+\textbf{Markov chain} with state-option pairs as states: It's one-step transition probability is given by
+\begin{equation}
+    P(s_{t+1}, \omega_{t+1} \mid s_t, \omega_t)
+    =
+    \sum_{a} \pi_{\omega_t, \theta}(a \mid s_t) \ P(s_{t+1} \mid s_t, a) \, \Big( \big( 1 - \beta_{\omega_t, \vartheta}(s_{t+1}) \big) \mathbf{1}_{\omega_t = \omega_{t+1}} + \beta_{\omega_t, \vartheta}(s_{t+1}) \, \pi_\Omega(\omega_{t+1} \mid s_{t+1}) \Big)
+\end{equation}
+This process is homogeneous and ergodic.
