@@ -61,3 +61,32 @@ One such parameterisation is
     \sum_{a} \pi_{\omega_t, \theta}(a \mid s_t) \ P(s_{t+1} \mid s_t, a) \, \Big( \big( 1 - \beta_{\omega_t, \vartheta}(s_{t+1}) \big) \mathbf{1}_{\omega_t = \omega_{t+1}} + \beta_{\omega_t, \vartheta}(s_{t+1}) \, \pi_\Omega(\omega_{t+1} \mid s_{t+1}) \Big)
 \end{equation}
 This process is homogeneous and ergodic.
+
+\textbf{Intra-Option Policy Gradient Theorem:} Initial condition \( (s_0, \omega_0) \)
+\begin{align}
+    \frac{\partial Q_\Omega(s, \omega)}{\partial \theta}
+     & =
+    \sum_{s, \omega} \mu_\Omega(s, \omega \mid s_0, \omega_0) \sum_{a} \frac{\partial \pi_{\omega, \theta}(a \mid s)}{\partial \theta} \ Q_U(s, \omega, a)
+    \\
+    \text{where }
+    \mu_\Omega(s, \omega \mid s_0, \omega_0)
+     & =
+    \sum_{t=0}^\infty \gamma^t P(s_t = s, \omega_t = \omega \mid s_0, \omega_0)
+\end{align}
+
+\textbf{Termination Gradient Theorem:}
+Initial condition \( (s_1, \omega_0) \)
+\begin{align}
+    \frac{\partial Q_\Omega(s, \omega)}{\partial \vartheta}
+     & =
+    - \sum_{s', \omega} \mu_\Omega(s', \omega \mid s_1, \omega_0) \, \frac{\partial \beta_{\omega, \vartheta}(s')}{\partial \vartheta} \ A_\Omega(s', \omega)
+    \\
+    \text{where }
+    \mu_\Omega(s, \omega \mid s_1, \omega_0)
+     & =
+    \sum_{t=0}^\infty \gamma^t P(s_t = s, \omega_t = \omega \mid s_1, \omega_0)
+    \\
+    A_\Omega(s', \omega)
+     & =
+    Q_\Omega(s', \omega) - V_\Omega(s')
+\end{align}
