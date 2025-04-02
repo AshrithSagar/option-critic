@@ -1,0 +1,30 @@
+\section*{Proofs}
+
+\subsection*{Intra-option policy gradient theorem~\cite{bacon2017option}}
+
+The derivative of the option-value function~\eqref{eq:Q_Omega} with respect to the intra-option policy parameter \( \theta \), and with an initial condition \( (s_0, \omega_0) \), is given by
+\begin{align}
+    \frac{\partial Q_\Omega(s, \omega)}{\partial \theta}
+     & =
+    \frac{\partial}{\partial \theta} \sum_{a} \pi_{\theta, \omega}(a \mid s) \ Q_U(s, \omega, a)
+    \tag{From \( Q_\Omega \)~\eqref{eq:Q_Omega}}
+    \\ & =
+    \sum_{a} \left( \frac{\partial \pi_{\theta, \omega}(a \mid s)}{\partial \theta}  \ Q_U(s, \omega, a) + \pi_{\theta, \omega}(a \mid s) \, \frac{\partial Q_U(s, \omega, a)}{\partial \theta} \right)
+    \tag{Product rule}
+    \\ & =
+    \sum_{a} \left( \frac{\partial \pi_{\theta, \omega}(a \mid s)}{\partial \theta}  \ Q_U(s, \omega, a) + \gamma \, \pi_{\theta, \omega}(a \mid s) \sum_{s'} P(s' \mid s, a) \, \frac{\partial U(\omega, s')}{\partial \theta} \right)
+    \tag{From \( Q_U \)~\eqref{eq:Q_U}}
+\end{align}
+\begin{align}
+    \implies
+    \frac{\partial U(\omega, s')}{\partial \theta}
+     & =
+    \big( 1 - \beta_{\omega, \vartheta}(s') \big) \frac{\partial Q_\Omega(s', \omega)}{\partial \theta} + \beta_{\omega, \vartheta}(s') \frac{\partial V_\Omega(s')}{\partial \theta}
+    \tag{From \( U \)~\eqref{eq:U}}
+    \\ & =
+    \big( 1 - \beta_{\omega, \vartheta}(s') \big) \frac{\partial Q_\Omega(s', \omega)}{\partial \theta} + \beta_{\omega, \vartheta}(s') \sum_{\omega'} \pi_\Omega(\omega' \mid s') \, \frac{\partial Q_\Omega(s', \omega')}{\partial \theta}
+    \tag{From \( V_\Omega \)~\eqref{eq:V_Omega}}
+    \\ & =
+    \sum_{\omega'} \Big( \big( 1 - \beta_{\omega, \vartheta}(s') \big) \mathbf{1}_{\omega' = \omega} + \beta_{\omega, \vartheta}(s') \pi_\Omega(\omega' \mid s') \Big) \frac{\partial Q_\Omega(s', \omega')}{\partial \theta}
+    \tag{Using indicator}
+\end{align}

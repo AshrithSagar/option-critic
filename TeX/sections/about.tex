@@ -1,4 +1,4 @@
-\section*{About | Option-critic}
+\section*{About | Option-critic~\cite{bacon2017option, Sutton1999}}
 
 \( \Omega \to \) Set of all Markov options
 
@@ -38,20 +38,31 @@ One such parameterisation is
     \text{Parameter vector for } \omega
 \end{equation}
 \( \beta_{\omega, \vartheta}(s) \to \) Termination function of option \( \omega \) parameterised by \( \vartheta \).
+\begin{equation}
+    V_\Omega(s)
+    =
+    \sum_{\omega} \pi_\Omega(\omega \mid s) \, Q_\Omega(s, \omega)
+    =
+    \mathbb{E}_{\omega \sim \pi_\Omega(\cdot \mid s)} \Big[ Q_\Omega(s, \omega) \Big]
+    \label{eq:V_Omega}
+\end{equation}
 
 \textbf{Objective:} Goal is to learn options that maximise the expected return in the current task.
 \begin{align}
     Q_\Omega(s, \omega)
      & =
     \sum_{a} \pi_{\theta, \omega}(a \mid s) \ Q_U(s, \omega, a)
+    \label{eq:Q_Omega}
     \\
     Q_U(s, \omega, a)
      & =
     r(s, a) + \gamma \sum_{s'} P(s' \mid s, a) \ U(\omega, s')
+    \label{eq:Q_U}
     \\
     U(\omega, s')
      & =
     \big( 1 - \beta_{\omega, \vartheta}(s') \big) \, Q_\Omega(s', \omega) + \beta_{\omega, \vartheta}(s') \, V_\Omega(s')
+    \label{eq:U}
 \end{align}
 
 \textbf{Markov chain} with state-option pairs as states: It's one-step transition probability is given by
