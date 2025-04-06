@@ -8,7 +8,7 @@ from agent import OptionCriticAgent
 
 
 def main():
-    env = gym.make("Taxi-v3")
+    env = gym.make("Taxi-v3", render_mode="human")
     nS = env.observation_space.n
     nA = env.action_space.n
 
@@ -18,6 +18,7 @@ def main():
     max_steps = 200
     for episode in range(n_episodes):
         s, _ = env.reset()
+        env.render()
         o = agent.choose_option(s)
         total_reward = 0
 
