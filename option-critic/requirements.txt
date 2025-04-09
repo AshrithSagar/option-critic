@@ -1,0 +1,5 @@
+gymnasium
+gymnasium[atari]
+matplotlib
+minigrid
+numpy
