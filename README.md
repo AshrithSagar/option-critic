@@ -4,7 +4,7 @@ The Option-Critic Architecture
 
 ## Installation
 
-Clone the repo and install the dependencies:
+Clone the repo and install the [dependencies](requirements.txt):
 
 ```shell
 pip3 install -r requirements.txt
