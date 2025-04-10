@@ -107,7 +107,7 @@ def run(args: argparse.Namespace):
     option_critic = OptionCriticConv if is_atari else OptionCriticFeatures
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
-    option_critic = option_critic(
+    oca = option_critic(
         in_features=env.observation_space.shape[0],
         num_actions=env.action_space.n,
         num_options=args.num_options,
@@ -119,9 +119,9 @@ def run(args: argparse.Namespace):
         device=device,
     )
     # Create a prime network for more stable Q values
-    option_critic_prime = deepcopy(option_critic)
+    oca_prime = deepcopy(oca)
 
-    optim = torch.optim.RMSprop(option_critic.parameters(), lr=args.learning_rate)
+    optim = torch.optim.RMSprop(oca.parameters(), lr=args.learning_rate)
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -141,8 +141,8 @@ def run(args: argparse.Namespace):
         option_lengths = {opt: [] for opt in range(args.num_options)}
 
         obs, _ = env.reset()
-        state = option_critic.get_state(to_tensor(obs))
-        greedy_option = option_critic.greedy_option(state)
+        state = oca.get_state(to_tensor(obs))
+        greedy_option = oca.greedy_option(state)
         current_option = 0
 
         # Goal switching experiment: run for 1k episodes in fourrooms, switch goals and run for another
@@ -150,16 +150,16 @@ def run(args: argparse.Namespace):
         # should be finedtuned (this is what we would hope).
         if args.switch_goal and logger.n_eps == 1000:
             torch.save(
-                {"model_params": option_critic.state_dict(), "goal_state": env.goal},
-                f"models/option_critic_seed={args.seed}_1k",
+                {"model_params": oca.state_dict(), "goal_state": env.goal},
+                f"models/oca_seed={args.seed}_1k",
             )
             env.switch_goal()
             print(f"New goal {env.goal}")
 
         if args.switch_goal and logger.n_eps > 2000:
             torch.save(
-                {"model_params": option_critic.state_dict(), "goal_state": env.goal},
-                f"models/option_critic_seed={args.seed}_2k",
+                {"model_params": oca.state_dict(), "goal_state": env.goal},
+                f"models/oca_seed={args.seed}_2k",
             )
             break
 
@@ -168,7 +168,7 @@ def run(args: argparse.Namespace):
         option_termination = True
         curr_op_len = 0
         while not done and ep_steps < args.max_steps_ep:
-            epsilon = option_critic.epsilon
+            epsilon = oca.epsilon
 
             if option_termination:
                 option_lengths[current_option].append(curr_op_len)
@@ -179,7 +179,7 @@ def run(args: argparse.Namespace):
                 )
                 curr_op_len = 0
 
-            action, logp, entropy = option_critic.get_action(state, current_option)
+            action, logp, entropy = oca.get_action(state, current_option)
 
             next_obs, reward, done, _, _ = env.step(action)
             buffer.push(obs, current_option, reward, next_obs, done)
@@ -195,17 +195,15 @@ def run(args: argparse.Namespace):
                     reward,
                     done,
                     next_obs,
-                    option_critic,
-                    option_critic_prime,
+                    oca,
+                    oca_prime,
                     args,
                 )
                 loss = actor_loss
 
                 if steps % args.update_frequency == 0:
                     data_batch = buffer.sample(args.batch_size)
-                    critic_loss = critic_loss_fn(
-                        option_critic, option_critic_prime, data_batch, args
-                    )
+                    critic_loss = critic_loss_fn(oca, oca_prime, data_batch, args)
                     loss += critic_loss
 
                 optim.zero_grad()
@@ -213,13 +211,13 @@ def run(args: argparse.Namespace):
                 optim.step()
 
                 if steps % args.freeze_interval == 0:
-                    option_critic_prime.load_state_dict(option_critic.state_dict())
+                    oca_prime.load_state_dict(oca.state_dict())
 
-            state = option_critic.get_state(to_tensor(next_obs))
+            state = oca.get_state(to_tensor(next_obs))
             (
                 option_termination,
                 greedy_option,
-            ) = option_critic.predict_option_termination(state, current_option)
+            ) = oca.predict_option_termination(state, current_option)
 
             # update global steps etc
             steps += 1
