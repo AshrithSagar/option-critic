@@ -1,16 +1,26 @@
-import logging
-import math
+"""
+fourrooms.py \n
+Fourrooms environment
+"""
 
-import gym
+import logging
+
+import gymnasium as gym
 import numpy as np
-from gym import spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 
 logger = logging.getLogger(__name__)
 
 
 class Fourrooms(gym.Env):
-    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 50}
+    """Fourrooms environment"""
+
+    metadata = {
+        "render_modes": ["human", "rgb_array"],
+        "render_fps": 50,
+        "torch": True,
+    }
 
     def __init__(self):
         layout = """\
@@ -35,7 +45,7 @@ wwwwwwwwwwwww
             ]
         )
 
-        # From any state the agent can perform one of four actions, up, down, left or right
+        # From any state the agent can perform one of four actions: up, down, left or right
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(
             low=0.0, high=1.0, shape=(np.sum(self.occupancy == 0),)
