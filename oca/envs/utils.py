@@ -9,9 +9,11 @@ import gymnasium as gym
 import numpy as np
 import torch
 from envs.fourrooms import Fourrooms
-from gym.wrappers import AtariPreprocessing
-from gym.wrappers import FrameStack as FrameStack_
-from gym.wrappers import TransformReward
+from gymnasium.wrappers import (
+    AtariPreprocessing,
+    FrameStackObservation,
+    TransformReward,
+)
 
 
 class LazyFrames(object):
@@ -31,9 +33,9 @@ class LazyFrames(object):
         return self.__array__()[i]
 
 
-class FrameStack(FrameStack_):
+class FrameStack(FrameStackObservation):
     def __init__(self, env, k):
-        FrameStack_.__init__(self, env, k)
+        FrameStackObservation.__init__(self, env, k)
 
     def _get_ob(self):
         assert len(self.frames) == self.k

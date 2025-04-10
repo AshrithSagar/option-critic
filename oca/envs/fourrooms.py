@@ -142,4 +142,4 @@ wwwwwwwwwwwww
             done = True
             reward = 0.0
 
-        return self.get_state(state), reward, done, None
+        return self.get_state(state), reward, done, None, None
