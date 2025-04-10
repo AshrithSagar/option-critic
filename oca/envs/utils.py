@@ -42,11 +42,11 @@ class FrameStack(FrameStackObservation):
         return LazyFrames(list(self.frames))
 
 
-def make_env(env_name: str) -> Tuple[gym.Env, bool]:
+def make_env(env_name: str, **kwargs) -> Tuple[gym.Env, bool]:
     if env_name == "fourrooms":
         return Fourrooms(), False
 
-    env = gym.make(env_name)
+    env = gym.make(env_name, **kwargs)
     is_atari = hasattr(gym.envs, "atari") and isinstance(
         env.unwrapped, gym.envs.atari.atari_env.AtariEnv
     )

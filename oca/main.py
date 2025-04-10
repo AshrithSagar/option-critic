@@ -103,7 +103,7 @@ parser.add_argument(
 
 
 def run(args: argparse.Namespace):
-    env, is_atari = make_env(args.env)
+    env, is_atari = make_env(args.env, render_mode="human")
     option_critic = OptionCriticConv if is_atari else OptionCriticFeatures
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
@@ -226,6 +226,8 @@ def run(args: argparse.Namespace):
             obs = next_obs
 
             logger.log_data(steps, actor_loss, critic_loss, entropy.item(), epsilon)
+
+        env.render()
 
         logger.log_episode(steps, rewards, option_lengths, ep_steps, epsilon)
 
