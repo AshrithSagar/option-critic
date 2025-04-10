@@ -4,11 +4,11 @@ Fourrooms environment
 """
 
 import logging
+from typing import Any
 
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
-from gymnasium.utils import seeding
 
 logger = logging.getLogger(__name__)
 
@@ -73,13 +73,6 @@ wwwwwwwwwwwww
         self.init_states.remove(self.goal)
         self.ep_steps = 0
 
-    def seed(self, seed=None):
-        return self._seed(seed)
-
-    def _seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
-
     def empty_around(self, cell):
         avail = []
         for action in range(self.action_space.n):
@@ -88,11 +81,17 @@ wwwwwwwwwwwww
                 avail.append(nextcell)
         return avail
 
-    def reset(self):
+    def reset(
+        self,
+        *,
+        seed: int | None = None,
+        options: dict[str, Any] | None = None,
+    ) -> tuple[np.ndarray, dict[str, Any]]:
+        super().reset(seed=seed)
         state = self.rng.choice(self.init_states)
         self.currentcell = self.tocell[state]
         self.ep_steps = 0
-        return self.get_state(state)
+        return self.get_state(state), {}
 
     def switch_goal(self):
         prev_goal = self.goal
@@ -144,8 +143,3 @@ wwwwwwwwwwwww
             reward = 0.0
 
         return self.get_state(state), reward, done, None
-
-
-if __name__ == "__main__":
-    env = Fourrooms()
-    env.seed(3)
