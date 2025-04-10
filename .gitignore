@@ -487,3 +487,5 @@ TSWLatexianTemp*
 ###
 **.pdf
 notebooks/
+
+oca/runs/*

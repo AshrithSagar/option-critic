@@ -3,6 +3,8 @@ envs/utils.py \n
 Utility functions for the environments
 """
 
+from typing import Tuple
+
 import gymnasium as gym
 import numpy as np
 import torch
@@ -38,7 +40,7 @@ class FrameStack(FrameStack_):
         return LazyFrames(list(self.frames))
 
 
-def make_env(env_name):
+def make_env(env_name: str) -> Tuple[gym.Env, bool]:
     if env_name == "fourrooms":
         return Fourrooms(), False
 

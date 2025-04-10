@@ -12,7 +12,7 @@ from utils.oca import actor_loss as actor_loss_fn
 from utils.oca import critic_loss as critic_loss_fn
 
 parser = argparse.ArgumentParser(description="Option Critic PyTorch")
-parser.add_argument("--env", default="CartPole-v0", help="ROM to run")
+parser.add_argument("--env", default="CartPole-v1", help="ROM to run")
 parser.add_argument(
     "--optimal-eps", type=float, default=0.05, help="Epsilon when playing optimally"
 )
@@ -102,7 +102,7 @@ parser.add_argument(
 )
 
 
-def run(args):
+def run(args: argparse.Namespace):
     env, is_atari = make_env(args.env)
     option_critic = OptionCriticConv if is_atari else OptionCriticFeatures
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
@@ -125,7 +125,7 @@ def run(args):
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-    env.seed(args.seed)
+    env.reset(seed=args.seed)
 
     buffer = ReplayBuffer(capacity=args.max_history, seed=args.seed)
     logger = Logger(
@@ -140,7 +140,7 @@ def run(args):
         rewards = 0
         option_lengths = {opt: [] for opt in range(args.num_options)}
 
-        obs = env.reset()
+        obs, _ = env.reset()
         state = option_critic.get_state(to_tensor(obs))
         greedy_option = option_critic.greedy_option(state)
         current_option = 0
@@ -181,7 +181,7 @@ def run(args):
 
             action, logp, entropy = option_critic.get_action(state, current_option)
 
-            next_obs, reward, done, _ = env.step(action)
+            next_obs, reward, done, _, _ = env.step(action)
             buffer.push(obs, current_option, reward, next_obs, done)
             rewards += reward
 
