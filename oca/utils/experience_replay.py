@@ -9,7 +9,7 @@ from collections import deque
 import numpy as np
 
 
-class ReplayBuffer(object):
+class ReplayBuffer:
     def __init__(self, capacity, seed=42):
         self.rng = random.SystemRandom(seed)
         self.buffer = deque(maxlen=capacity)

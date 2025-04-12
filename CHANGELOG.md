@@ -5,6 +5,7 @@
 ### Added
 
 - Plots: steps vs episodes
+- Paths in `constants.py`
 
 ## [v0.1.0] - 2025-04-12
 

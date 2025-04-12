@@ -486,7 +486,8 @@ TSWLatexianTemp*
 
 ###
 **.pdf
-notebooks/
 
-oca/runs/
-oca/models/
+notebooks/
+oca/notebooks/
+
+oca/experiments/

@@ -3,8 +3,9 @@ oca/utils/config.py \n
 Configuration utilities
 """
 
-import os
 from typing import Optional, Protocol
+
+from .constants import runs_dir
 
 
 class ConfigProto(Protocol):
@@ -54,8 +55,6 @@ class ConfigDefaults(ConfigProto):
     max_steps_total = int(4e6)
     cuda = True
     seed = 0
-    logdir = os.path.normpath(
-        os.path.join(os.path.dirname(__file__), "..", "runs")
-    )  # oca/runs/
+    logdir = runs_dir
     exp = None
     switch_goal = False

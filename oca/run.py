@@ -11,6 +11,7 @@ import torch
 
 from .envs.utils import make_env, to_tensor
 from .utils.cli import load_config
+from .utils.constants import models_dir
 from .utils.experience_replay import ReplayBuffer
 from .utils.logger import Logger
 from .utils.option_critic import OptionCriticConv, OptionCriticFeatures
@@ -68,7 +69,7 @@ def main():
         if args.switch_goal and logger.n_eps == 1000:
             torch.save(
                 {"model_params": oca.state_dict(), "goal_state": env.goal},
-                f"oca/models/oca_seed={args.seed}_1k",
+                f"{models_dir}/oca_seed={args.seed}_1k",
             )
             env.switch_goal()
             print(f"New goal {env.goal}")
@@ -76,7 +77,7 @@ def main():
         if args.switch_goal and logger.n_eps > 2000:
             torch.save(
                 {"model_params": oca.state_dict(), "goal_state": env.goal},
-                f"oca/models/oca_seed={args.seed}_2k",
+                f"{models_dir}/oca_seed={args.seed}_2k",
             )
             break
 
