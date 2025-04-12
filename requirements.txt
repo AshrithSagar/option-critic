@@ -1,6 +1,8 @@
-gymnasium[atari]
+click
 gymnasium
+gymnasium[atari]
 matplotlib
 minigrid
 numpy
+pyyaml
 tensorboard
