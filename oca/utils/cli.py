@@ -3,6 +3,10 @@ utils/cli.py \n
 Command-line interface for loading and overriding configuration settings.
 """
 
+import inspect
+import io
+import sys
+import tokenize
 from typing import Dict, Optional, Protocol, get_type_hints
 
 import click
@@ -30,7 +34,22 @@ def get_config(config_path: Optional[str] = None, **overrides) -> ConfigProto:
 def options_from_proto(proto: Protocol):
     """Dynamically generate click options based on a Protocol's attributes"""
 
+    def get_help_text() -> Dict[str, str]:
+        source = inspect.getsource(proto)
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+        comments, prev_name, prev_tokval = {}, None, ""
+        for toknum, tokval, _, _, _ in tokens:
+            if toknum == tokenize.NAME:
+                prev_tokval = tokval
+            elif toknum == tokenize.OP and tokval == ":":
+                prev_name = prev_tokval
+            elif toknum == tokenize.COMMENT and prev_name:
+                comments[prev_name] = tokval.strip("# ").strip()
+                prev_name = None
+        return comments
+
     def decorator(func):
+        help_text = get_help_text()
         for name, type_hint in reversed(get_type_hints(proto).items()):
             # Map Python types to Click types
             click_type = {
@@ -49,7 +68,7 @@ def options_from_proto(proto: Protocol):
                 f"--{name.replace('_', '-')}",
                 type=click_type,
                 default=None,
-                help=f"Override {name}.",
+                help=help_text.get(name),
             )(func)
         return func
 
@@ -76,4 +95,6 @@ def load_config(verbose: bool = False) -> ConfigProto:
                     print(f"  {key}: {getattr(config, key)}")
         return config
 
-    return cli.main(standalone_mode=False)
+    # Early exit if --help
+    standalone_mode = "--help" in sys.argv
+    return cli.main(standalone_mode=standalone_mode)
