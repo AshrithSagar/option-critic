@@ -35,6 +35,7 @@ def options_from_proto(proto: Protocol):
     """Dynamically generate click options based on a Protocol's attributes"""
 
     def get_help_text() -> Dict[str, str]:
+        """Extract comments from the Protocol to use as help text."""
         source = inspect.getsource(proto)
         tokens = tokenize.generate_tokens(io.StringIO(source).readline)
         comments, prev_name, prev_tokval = {}, None, ""
@@ -78,7 +79,7 @@ def options_from_proto(proto: Protocol):
 def load_config(verbose: bool = False) -> ConfigProto:
     """Handles CLI arguments and returns the final configuration."""
 
-    @click.command()
+    @click.command(help="Option Critic Architecture | PyTorch")
     @options_from_proto(ConfigProto)
     @click.option(
         "--config-path",

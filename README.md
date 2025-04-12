@@ -14,11 +14,11 @@ cd oca
 ## Usage
 
 ```shell
-python3 main.py
+python3 run.py --help
 ```
 
 ```shell
-python3 main.py --switch-goal True --env fourrooms
+python3 run.py --switch-goal True --env fourrooms
 ```
 
 ## References
