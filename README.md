@@ -4,21 +4,22 @@ The Option-Critic Architecture
 
 ## Installation
 
-Clone the repo and install the [dependencies](requirements.txt):
+Clone the repo and install in editable mode using `pip` from the project root directory:
 
 ```shell
-pip3 install -r requirements.txt
-cd oca
+pip install -e .
 ```
+
+The list of dependencies are available [here](requirements.txt), which are automatically installed.
 
 ## Usage
 
 ```shell
-python3 run.py --help
+oca --help
 ```
 
 ```shell
-python3 run.py --switch-goal True --env fourrooms
+oca --switch-goal True --env fourrooms
 ```
 
 ## References
