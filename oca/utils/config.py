@@ -1,5 +1,5 @@
 """
-utils/config.py \n
+oca/utils/config.py \n
 Configuration utilities
 """
 

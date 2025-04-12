@@ -1,5 +1,5 @@
 """
-utils/oca.py \n
+oca/utils/option_critic.py \n
 Option Critic Architecture
 """
 
@@ -90,6 +90,12 @@ class OptionCriticBase(nn.Module):
             eps = self.eps_test
         return eps
 
+    def get_state(self, obs):
+        if obs.ndim < 4:
+            obs = obs.unsqueeze(0)
+        obs = obs.to(self.device)
+        return self.features(obs)
+
 
 class OptionCriticConv(OptionCriticBase):
     """
@@ -114,12 +120,6 @@ class OptionCriticConv(OptionCriticBase):
             nn.ReLU(),
         )
 
-    def get_state(self, obs):
-        if obs.ndim < 4:
-            obs = obs.unsqueeze(0)
-        obs = obs.to(self.device)
-        return self.features(obs)
-
 
 class OptionCriticFeatures(OptionCriticBase):
     """
@@ -137,12 +137,6 @@ class OptionCriticFeatures(OptionCriticBase):
             nn.Linear(32, 64),
             nn.ReLU(),
         )
-
-    def get_state(self, obs):
-        if obs.ndim < 4:
-            obs = obs.unsqueeze(0)
-        obs = obs.to(self.device)
-        return self.features(obs)
 
 
 def critic_loss(model, model_prime, data_batch, args):

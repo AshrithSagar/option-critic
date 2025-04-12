@@ -1,6 +1,6 @@
 """
 oca/__main__.py
-Main entry point, if run as `python -m oca --help`
+Main entry point, if run as `python3 -m oca --help`
 """
 
 from .run import main

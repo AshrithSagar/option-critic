@@ -1,5 +1,5 @@
 """
-utils/cli.py \n
+oca/utils/cli.py \n
 Command-line interface for loading and overriding configuration settings.
 """
 
@@ -7,7 +7,7 @@ import inspect
 import io
 import sys
 import tokenize
-from typing import Dict, Optional, Protocol, get_type_hints
+from typing import Dict, Optional, get_type_hints
 
 import click
 import yaml
@@ -31,11 +31,11 @@ def get_config(config_path: Optional[str] = None, **overrides) -> ConfigProto:
     return config
 
 
-def options_from_proto(proto: Protocol):
-    """Dynamically generate click options based on a Protocol's attributes"""
+def config_options(proto: ConfigProto):
+    """Dynamically generate click options based on ConfigProto's attributes"""
 
     def get_help_text() -> Dict[str, str]:
-        """Extract comments from the Protocol to use as help text."""
+        """Extract comments from ConfigProto to use as help text."""
         source = inspect.getsource(proto)
         tokens = tokenize.generate_tokens(io.StringIO(source).readline)
         comments, prev_name, prev_tokval = {}, None, ""
@@ -80,7 +80,7 @@ def load_config(verbose: bool = False) -> ConfigProto:
     """Handles CLI arguments and returns the final configuration."""
 
     @click.command(help="Option Critic Architecture | PyTorch")
-    @options_from_proto(ConfigProto)
+    @config_options(ConfigProto)
     @click.option(
         "--config-path",
         type=click.Path(exists=True),

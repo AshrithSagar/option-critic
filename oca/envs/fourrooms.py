@@ -1,5 +1,5 @@
 """
-fourrooms.py \n
+oca/fourrooms.py \n
 Fourrooms environment
 """
 

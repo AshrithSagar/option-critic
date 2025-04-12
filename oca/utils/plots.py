@@ -1,5 +1,5 @@
 """
-utils/plots.py \n
+oca/utils/plots.py \n
 Plotting utilities
 """
 
