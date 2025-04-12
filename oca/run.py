@@ -13,9 +13,9 @@ from .envs.utils import make_env, to_tensor
 from .utils.cli import load_config
 from .utils.experience_replay import ReplayBuffer
 from .utils.logger import Logger
-from .utils.oca import OptionCriticConv, OptionCriticFeatures
-from .utils.oca import actor_loss as actor_loss_fn
-from .utils.oca import critic_loss as critic_loss_fn
+from .utils.option_critic import OptionCriticConv, OptionCriticFeatures
+from .utils.option_critic import actor_loss as actor_loss_fn
+from .utils.option_critic import critic_loss as critic_loss_fn
 
 
 def main():

@@ -51,9 +51,11 @@ class ConfigDefaults(ConfigProto):
     num_options = 2
     temp = 1.0
     max_steps_ep = 18000
-    max_steps_total = 4e6
+    max_steps_total = int(4e6)
     cuda = True
     seed = 0
-    logdir = os.path.join(os.path.dirname(__file__), "..", "runs")  # oca/runs/
+    logdir = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "..", "runs")
+    )  # oca/runs/
     exp = None
     switch_goal = False
