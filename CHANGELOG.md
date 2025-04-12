@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Plots: steps vs episodes
+
 ## [v0.1.0] - 2025-04-12
 
 ### Added
