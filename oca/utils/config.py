@@ -3,9 +3,7 @@ utils/config.py \n
 Configuration utilities
 """
 
-from typing import Dict, Optional, Protocol
-
-import yaml
+from typing import Optional, Protocol
 
 
 class ConfigProto(Protocol):
@@ -34,7 +32,7 @@ class ConfigProto(Protocol):
     switch_goal: bool  # Switch goal after 2k eps
 
 
-class ConfigDefaults:
+class ConfigDefaults(ConfigProto):
     env = "CartPole-v1"
     optimal_eps = 0.05
     frame_skip = 4
@@ -58,14 +56,3 @@ class ConfigDefaults:
     logdir = "runs"
     exp = None
     switch_goal = False
-
-
-def load_config(config_path: Optional[str] = None) -> ConfigProto:
-    config = ConfigDefaults()
-    if config_path:
-        # Override default config with custom config if provided
-        with open(config_path, "r") as file:
-            config_dict: Dict = yaml.safe_load(file)
-            for key, value in config_dict.items():
-                setattr(config, key, value)
-    return config

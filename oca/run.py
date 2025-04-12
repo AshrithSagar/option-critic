@@ -9,7 +9,7 @@ from copy import deepcopy
 import numpy as np
 import torch
 from envs.utils import make_env, to_tensor
-from utils.config import load_config
+from utils.cli import load_config
 from utils.experience_replay import ReplayBuffer
 from utils.logger import Logger
 from utils.oca import OptionCriticConv, OptionCriticFeatures
@@ -18,7 +18,7 @@ from utils.oca import critic_loss as critic_loss_fn
 
 
 def main():
-    args = load_config()
+    args = load_config(verbose=True)
     env, is_atari = make_env(args.env, render_mode="human")
     option_critic = OptionCriticConv if is_atari else OptionCriticFeatures
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
