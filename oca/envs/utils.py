@@ -8,12 +8,13 @@ from typing import Tuple
 import gymnasium as gym
 import numpy as np
 import torch
-from envs.fourrooms import Fourrooms
 from gymnasium.wrappers import (
     AtariPreprocessing,
     FrameStackObservation,
     TransformReward,
 )
+
+from .fourrooms import Fourrooms
 
 
 class LazyFrames(object):

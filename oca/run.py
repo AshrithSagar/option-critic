@@ -8,13 +8,14 @@ from copy import deepcopy
 
 import numpy as np
 import torch
-from envs.utils import make_env, to_tensor
-from utils.cli import load_config
-from utils.experience_replay import ReplayBuffer
-from utils.logger import Logger
-from utils.oca import OptionCriticConv, OptionCriticFeatures
-from utils.oca import actor_loss as actor_loss_fn
-from utils.oca import critic_loss as critic_loss_fn
+
+from .envs.utils import make_env, to_tensor
+from .utils.cli import load_config
+from .utils.experience_replay import ReplayBuffer
+from .utils.logger import Logger
+from .utils.oca import OptionCriticConv, OptionCriticFeatures
+from .utils.oca import actor_loss as actor_loss_fn
+from .utils.oca import critic_loss as critic_loss_fn
 
 
 def main():
@@ -67,7 +68,7 @@ def main():
         if args.switch_goal and logger.n_eps == 1000:
             torch.save(
                 {"model_params": oca.state_dict(), "goal_state": env.goal},
-                f"models/oca_seed={args.seed}_1k",
+                f"oca/models/oca_seed={args.seed}_1k",
             )
             env.switch_goal()
             print(f"New goal {env.goal}")
@@ -75,7 +76,7 @@ def main():
         if args.switch_goal and logger.n_eps > 2000:
             torch.save(
                 {"model_params": oca.state_dict(), "goal_state": env.goal},
-                f"models/oca_seed={args.seed}_2k",
+                f"oca/models/oca_seed={args.seed}_2k",
             )
             break
 

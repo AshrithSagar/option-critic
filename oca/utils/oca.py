@@ -7,8 +7,9 @@ from math import exp
 
 import torch
 import torch.nn as nn
-from envs.utils import to_tensor
 from torch.distributions import Bernoulli, Categorical
+
+from oca.envs.utils import to_tensor
 
 
 class OptionCriticBase(nn.Module):
