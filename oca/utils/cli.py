@@ -6,20 +6,30 @@ Command-line interface for loading and overriding configuration settings.
 import inspect
 import io
 import tokenize
-from typing import Dict, Literal, Optional, get_args, get_type_hints
+from typing import Callable, Dict, Literal, Optional, get_args, get_type_hints
 
 import click
 import yaml
 
-from .config import ConfigRunDefaults, ConfigRunProto
+from .config import (
+    ConfigPlotsDefaults,
+    ConfigPlotsProto,
+    ConfigProto,
+    ConfigRunDefaults,
+    ConfigRunProto,
+)
 from .constants import __root__
+from .plots import main as plots_main
 from .run import main as run_main
 
 
 def load_config(
-    config_path: Optional[str] = None, verbose: bool = False, **overrides
-) -> ConfigRunProto:
-    config = ConfigRunDefaults()
+    defaults: ConfigProto,
+    config_path: Optional[str] = None,
+    verbose: bool = False,
+    **overrides,
+) -> ConfigProto:
+    config = defaults()
     # Override defaults with YAML file if provided
     if config_path:
         with open(config_path, "r") as file:
@@ -39,7 +49,7 @@ def load_config(
     return config
 
 
-def config_options(proto: ConfigRunProto):
+def config_options(proto: ConfigProto) -> Callable:
     """Dynamically generate click options based on a Protocol's attributes"""
 
     def get_help_text() -> Dict[str, str]:
@@ -103,12 +113,14 @@ def config_path(func):
 @config_path
 def run(config_path: str, **kwargs):
     """Run an agent on an environment."""
-    args = load_config(config_path, verbose=True, **kwargs)
+    args = load_config(ConfigRunDefaults, config_path, verbose=True, **kwargs)
     run_main(args)
 
 
 @click.command()
+@config_options(ConfigPlotsProto)
 @config_path
 def plot(config_path: str, **kwargs):
     """Plotting utilities."""
-    pass
+    args = load_config(ConfigPlotsDefaults, config_path, verbose=True, **kwargs)
+    plots_main(args)

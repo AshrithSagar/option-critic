@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Inheritance from `ConfigProto`
+
 ## [v0.2.0] - 2025-04-13
 
 ### Added

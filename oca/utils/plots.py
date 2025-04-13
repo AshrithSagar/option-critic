@@ -3,15 +3,16 @@ oca/utils/plots.py \n
 Plotting utilities
 """
 
-import argparse
 import os
 import re
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .config import ConfigPlotsProto
 
-def parse_log_file(log_path):
+
+def parse_log_file(log_path: str):
     episode_steps = []
     with open(log_path, "r") as file:
         for line in file:
@@ -31,10 +32,9 @@ def smooth(y, box_pts):
     return np.convolve(y, box, mode="same")
 
 
-def plot_steps_vs_episodes(log_dir, run_name, smooth_window=10, save_path=None):
-    log_path = os.path.join(log_dir, run_name, "logger.log")
+def plot_steps_vs_episodes(args: ConfigPlotsProto):
+    log_path = os.path.join(args.logdir, args.run_name, "logger.log")
     data = parse_log_file(log_path)
-
     if not data:
         print("No data found in log.")
         return
@@ -42,37 +42,17 @@ def plot_steps_vs_episodes(log_dir, run_name, smooth_window=10, save_path=None):
     episodes, ep_steps = zip(*data)
     plt.figure(figsize=(10, 6))
     plt.plot(episodes, ep_steps, alpha=0.2)
-    plt.plot(episodes, smooth(ep_steps, smooth_window))
+    plt.plot(episodes, smooth(ep_steps, args.smooth_window))
     plt.xlabel("Episodes")
     plt.ylabel("Steps")
     plt.grid(True, linestyle=":")
 
-    if save_path:
-        plt.savefig(save_path)
-        print(f"Plot saved to {save_path}")
+    if args.save_path:
+        plt.savefig(args.save_path)
+        print(f"Plot saved to {args.save_path}")
     else:
         plt.show()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--log_dir",
-        type=str,
-        default="../runs/",
-        help="Directory containing the run folders",
-    )
-    parser.add_argument(
-        "--run_name", type=str, required=True, help="Name of the run folder"
-    )
-    parser.add_argument(
-        "--smooth_window", type=int, default=10, help="Window size for smoothing"
-    )
-    parser.add_argument(
-        "--save_path", type=str, default=None, help="Optional path to save the plot"
-    )
-
-    args = parser.parse_args()
-    plot_steps_vs_episodes(
-        args.log_dir, args.run_name, args.smooth_window, args.save_path
-    )
+def main(args: ConfigPlotsProto):
+    plot_steps_vs_episodes(args)
