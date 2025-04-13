@@ -33,7 +33,7 @@ class SARSAAgent:
         # Q-network approximator
         self.q_net = nn.Linear(state_dim, action_dim, bias=False)
         nn.init.zeros_(self.q_net.weight)  # Initialize all weights to zero
-        self.optimizer = optim.SGD(self.q_net.parameters(), lr=lr)
+        self.optimizer = optim.RMSprop(self.q_net.parameters(), lr=lr)
 
     def get_q_values(self, state: NDArray) -> NDArray:
         # state: numpy array shape (state_dim,)
@@ -135,8 +135,8 @@ def run_sarsa():
     for ep in range(num_episodes):
         R = agent.train_episode(env)
         rewards.append(R)
-        if (ep + 1) % 100 == 0:
-            print(f"Episode {ep+1}, Reward: {np.mean(rewards[-100:]):.2f}")
+        if (ep) % 50 == 0:
+            print(f"Episode {ep}, Reward: {np.mean(rewards[-100:]):.2f}")
 
 
 if __name__ == "__main__":

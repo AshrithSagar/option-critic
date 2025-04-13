@@ -22,7 +22,8 @@ class ActorCriticAgent:
         self,
         state_dim: int,
         action_dim: int,
-        lr: float = 0.01,
+        lr_actor: float = 0.001,
+        lr_critic: float = 0.01,
         temperature: float = 0.001,
         gamma: float = 0.99,
     ):
@@ -34,10 +35,9 @@ class ActorCriticAgent:
         # value: linear
         self.value_net = nn.Linear(state_dim, 1, bias=False)
         nn.init.zeros_(self.value_net.weight)  # Initialize all weights to zero
-        self.optimizer = optim.SGD(
-            list(self.policy_net.parameters()) + list(self.value_net.parameters()),
-            lr=lr,
-        )
+        # separate optimizers for actor and critic
+        self.optimizer_actor = optim.RMSprop(self.policy_net.parameters(), lr=lr_actor)
+        self.optimizer_critic = optim.RMSprop(self.value_net.parameters(), lr=lr_critic)
 
     def get_policy(self, state: NDArray) -> NDArray:
         state_tensor = torch.from_numpy(state).float().unsqueeze(0)
@@ -50,8 +50,8 @@ class ActorCriticAgent:
     def select_action(self, state: NDArray) -> Tuple[Number, Tensor]:
         probs = self.get_policy(state)
         m = Categorical(probs)
-        action = m.sample().item()
-        return action, m.log_prob(torch.tensor(action))
+        action = m.sample()
+        return action.item(), m.log_prob(action)
 
     def update(
         self,
@@ -64,26 +64,32 @@ class ActorCriticAgent:
         state_tensor = torch.from_numpy(state).float().unsqueeze(0)
         next_state_tensor = torch.from_numpy(next_state).float().unsqueeze(0)
 
+        # Critic: compute TD target and TD error (advantage)
         value: Tensor = self.value_net(state_tensor).squeeze(0)
         next_value: Tensor = (
-            0.0 if done else self.value_net(next_state_tensor).squeeze(0).detach()
+            torch.tensor(0.0)
+            if done
+            else self.value_net(next_state_tensor).squeeze(0).detach()
         )
         td_target = reward + self.gamma * next_value
-        td_error = td_target - value
+        advantage = td_target - value
 
-        # Loss: critic MSE + actor policy gradient
-        value_loss: Tensor = td_error.pow(2)
-        policy_loss: Tensor = -log_prob * td_error.detach()
-        loss: Tensor = value_loss + policy_loss
+        # Critic update (MSE loss)
+        critic_loss = advantage.pow(2)
+        self.optimizer_critic.zero_grad()
+        critic_loss.backward()
+        self.optimizer_critic.step()
 
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        # Actor update (policy gradient)
+        actor_loss = -log_prob * advantage.detach()
+        self.optimizer_actor.zero_grad()
+        actor_loss.backward()
+        self.optimizer_actor.step()
 
     def train_episode(self, env: gym.Env, max_steps: int = 1000) -> float:
         state: NDArray
         state, _ = env.reset()
-        total_reward = 0.0
+        total_reward: float = 0.0
         for t in range(max_steps):
             action, log_prob = self.select_action(state)
             next_state: NDArray
@@ -128,7 +134,12 @@ def run_acpg():
     env = OneHotWrapper(env)
 
     agent = ActorCriticAgent(
-        state_dim, action_dim, lr=0.01, temperature=0.001, gamma=0.99
+        state_dim,
+        action_dim,
+        lr_actor=0.001,
+        lr_critic=0.01,
+        temperature=0.001,
+        gamma=0.99,
     )
 
     num_episodes = 1000
@@ -136,8 +147,8 @@ def run_acpg():
     for ep in range(num_episodes):
         R = agent.train_episode(env)
         rewards.append(R)
-        if (ep + 1) % 100 == 0:
-            print(f"Episode {ep+1}, Reward: {np.mean(rewards[-100:]):.2f}")
+        if (ep) % 50 == 0:
+            print(f"Episode {ep}, Reward: {np.mean(rewards[-100:]):.2f}")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@
 ### Changed
 
 - Inheritance from `ConfigProto`
+- Agents: `ActorCriticAgent` added
 
 ## [v0.2.0] - 2025-04-13
 
