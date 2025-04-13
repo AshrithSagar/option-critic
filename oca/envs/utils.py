@@ -14,7 +14,7 @@ from gymnasium.wrappers import (
     TransformReward,
 )
 
-from .fourrooms import Fourrooms
+from .fourrooms import FourRoomsEnv
 
 
 class LazyFrames(object):
@@ -45,7 +45,7 @@ class FrameStack(FrameStackObservation):
 
 def make_env(env_name: str, **kwargs) -> Tuple[gym.Env, bool]:
     if env_name == "fourrooms":
-        return Fourrooms(), False
+        return FourRoomsEnv(), False
 
     env = gym.make(env_name, **kwargs)
     is_atari = hasattr(gym.envs, "atari") and isinstance(

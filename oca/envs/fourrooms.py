@@ -13,7 +13,7 @@ from gymnasium import spaces
 logger = logging.getLogger(__name__)
 
 
-class Fourrooms(gym.Env):
+class FourRoomsEnv(gym.Env):
     """Fourrooms environment"""
 
     metadata = {
