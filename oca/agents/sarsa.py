@@ -13,10 +13,13 @@ import torch.optim as optim
 from numpy.typing import NDArray
 from torch import Tensor
 
-from oca.envs.fourrooms import FourRoomsEnv
+from ..envs.fourrooms import FourRoomsEnv
+from ..envs.utils import OneHotWrapper
+from ..utils.config import ConfigRunProto
+from ..utils.constants import models_dir
 
 
-class SARSAAgent:
+class SARSAAgent(nn.Module):
     def __init__(
         self,
         state_dim: int,
@@ -25,6 +28,7 @@ class SARSAAgent:
         temperature: float = 0.001,
         gamma: float = 0.99,
     ):
+        super().__init__()
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.temperature = temperature
@@ -97,47 +101,43 @@ class SARSAAgent:
         return total_reward
 
 
-# convert discrete state to one-hot vector in wrapper
-class OneHotWrapper(gym.Wrapper):
-    def __init__(self, env: gym.Env):
-        self.env = env
-        self.n = env.observation_space.shape[0]
-        self.action_space = env.action_space
-        self.observation_space = env.observation_space
-
-    def reset(self) -> Tuple[NDArray, dict]:
-        s: NDArray
-        s, *_ = self.env.reset()
-        return self._one_hot(s), {}
-
-    def step(self, a: int) -> Tuple[NDArray, float, bool, bool, dict]:
-        s: NDArray
-        s, r, done, _, info = self.env.step(a)
-        return self._one_hot(s), r, done, _, info
-
-    def _one_hot(self, s: NDArray) -> NDArray:
-        vec = np.zeros(self.n, dtype=np.float32)
-        scalar_s = s.item() if np.isscalar(s) else s[0]
-        vec[int(scalar_s)] = 1.0
-        return vec
-
-
-def run_sarsa():
-    env = FourRoomsEnv()
+def run_sarsa(args: ConfigRunProto, env: gym.Env, **kwargs):
     state_dim: int = env.observation_space.shape[0]  # if one-hot state
     action_dim: int = env.action_space.n
     env = OneHotWrapper(env)
 
-    agent = SARSAAgent(state_dim, action_dim, lr=0.01, temperature=0.001, gamma=0.99)
+    agent = SARSAAgent(
+        state_dim,
+        action_dim,
+        lr=args.learning_rate,
+        temperature=args.temperature,
+        gamma=args.gamma,
+    )
 
-    num_episodes = 1000
     rewards = []
-    for ep in range(num_episodes):
+    ep = 0
+    if args.switch_goal:
+        env: FourRoomsEnv
+        print(f"Current goal {env.goal}")
+    while ep < args.max_steps_total:
         R = agent.train_episode(env)
         rewards.append(R)
-        if (ep) % 50 == 0:
-            print(f"Episode {ep}, Reward: {np.mean(rewards[-100:]):.2f}")
 
+        if args.switch_goal and ep == 1000:
+            torch.save(
+                {"model_params": agent.state_dict(), "goal_state": env.goal},
+                f"{models_dir}/sarsa_seed={args.seed}_1k",
+            )
+            env.switch_goal()
+            print(f"New goal {env.goal}")
 
-if __name__ == "__main__":
-    run_sarsa()
+        if args.switch_goal and ep == 2000:
+            torch.save(
+                {"model_params": agent.state_dict(), "goal_state": env.goal},
+                f"{models_dir}/sarsa_seed={args.seed}_2k",
+            )
+            break
+
+        print(f"Episode {ep}, Reward: {np.mean(rewards[-100:]):.2f}")
+        ep += 1
+        env.render()

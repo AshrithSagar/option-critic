@@ -4,8 +4,9 @@
 
 ### Changed
 
-- Inheritance from `ConfigProto`
+- Config inheritance from `ConfigProto`
 - Agents: `ActorCriticAgent` added
+- `oca run` refactored
 
 ## [v0.2.0] - 2025-04-13
 
