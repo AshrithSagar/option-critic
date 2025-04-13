@@ -1,3 +1,4 @@
+ale-py
 click
 gymnasium
 gymnasium[atari]
@@ -6,3 +7,5 @@ minigrid
 numpy
 pyyaml
 tensorboard
+tensorboard
+torch
