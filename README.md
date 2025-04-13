@@ -19,11 +19,11 @@ The list of dependencies are available [here](requirements.txt), which are autom
 ## Usage
 
 ```shell
-oca --help
+oca run --help
 ```
 
 ```shell
-oca --switch-goal True --env fourrooms
+oca run --switch-goal True --env fourrooms
 ```
 
 ## References
