@@ -3,10 +3,10 @@ oca/agents/acpg.py \n
 Actor-Critic agent with policy gradient
 """
 
+import time
 from typing import Tuple
 
 import gymnasium as gym
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -18,6 +18,7 @@ from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import OneHotWrapper
 from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
+from ..utils.logger import RegularLogger
 
 
 class ActorCriticAgent(nn.Module):
@@ -30,6 +31,7 @@ class ActorCriticAgent(nn.Module):
         temperature: float = 0.001,
         gamma: float = 0.99,
     ):
+        super().__init__()
         self.gamma = gamma
         self.temperature = temperature
         # policy: linear softmax
@@ -119,30 +121,34 @@ def run_acpg(args: ConfigRunProto, env: gym.Env, **kwargs):
         gamma=args.gamma,
     )
 
-    rewards = []
+    logger = RegularLogger(
+        logdir=args.logdir,
+        run_name=f"{ActorCriticAgent.__name__}-{args.env}-{args.exp_name}-{time.ctime()}",
+    )
+
     ep = 0
     if args.switch_goal:
         env: FourRoomsEnv
         print(f"Current goal {env.goal}")
     while ep < args.max_steps_total:
-        R = agent.train_episode(env)
-        rewards.append(R)
+        reward = agent.train_episode(env)
 
-        if args.switch_goal and ep == 1000:
+        if args.switch_goal and logger.n_eps == 1000:
             torch.save(
                 {"model_params": agent.state_dict(), "goal_state": env.goal},
-                f"{models_dir}/sarsa_seed={args.seed}_1k",
+                f"{models_dir}/acpg_seed={args.seed}_1k",
             )
             env.switch_goal()
             print(f"New goal {env.goal}")
 
-        if args.switch_goal and ep == 2000:
+        if args.switch_goal and logger.n_eps > 2000:
             torch.save(
                 {"model_params": agent.state_dict(), "goal_state": env.goal},
-                f"{models_dir}/sarsa_seed={args.seed}_2k",
+                f"{models_dir}/acpg_seed={args.seed}_2k",
             )
             break
 
-        print(f"Episode {ep}, Reward: {np.mean(rewards[-100:]):.2f}")
         ep += 1
         env.render()
+
+        logger.log_episode(ep, reward)

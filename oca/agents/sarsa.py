@@ -3,6 +3,7 @@ oca/agents/sarsa.py \n
 SARSA agent
 """
 
+import time
 from typing import Tuple
 
 import gymnasium as gym
@@ -17,6 +18,7 @@ from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import OneHotWrapper
 from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
+from ..utils.logger import RegularLogger
 
 
 class SARSAAgent(nn.Module):
@@ -114,16 +116,19 @@ def run_sarsa(args: ConfigRunProto, env: gym.Env, **kwargs):
         gamma=args.gamma,
     )
 
-    rewards = []
+    logger = RegularLogger(
+        logdir=args.logdir,
+        run_name=f"{SARSAAgent.__name__}-{args.env}-{args.exp_name}-{time.ctime()}",
+    )
+
     ep = 0
     if args.switch_goal:
         env: FourRoomsEnv
         print(f"Current goal {env.goal}")
     while ep < args.max_steps_total:
-        R = agent.train_episode(env)
-        rewards.append(R)
+        reward = agent.train_episode(env)
 
-        if args.switch_goal and ep == 1000:
+        if args.switch_goal and logger.n_eps == 1000:
             torch.save(
                 {"model_params": agent.state_dict(), "goal_state": env.goal},
                 f"{models_dir}/sarsa_seed={args.seed}_1k",
@@ -131,13 +136,14 @@ def run_sarsa(args: ConfigRunProto, env: gym.Env, **kwargs):
             env.switch_goal()
             print(f"New goal {env.goal}")
 
-        if args.switch_goal and ep == 2000:
+        if args.switch_goal and logger.n_eps > 2000:
             torch.save(
                 {"model_params": agent.state_dict(), "goal_state": env.goal},
                 f"{models_dir}/sarsa_seed={args.seed}_2k",
             )
             break
 
-        print(f"Episode {ep}, Reward: {np.mean(rewards[-100:]):.2f}")
         ep += 1
         env.render()
+
+        logger.log_episode(ep, reward)

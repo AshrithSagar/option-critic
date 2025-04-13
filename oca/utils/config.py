@@ -14,7 +14,7 @@ class ConfigProto(Protocol):
 
 class ConfigRunProto(ConfigProto):
     env: str  # ROM to run
-    agent: Literal["OptionCritic", "SARSA"]  # Agent to use
+    agent: Literal["OptionCritic", "SARSA", "ACPG"]  # Agent to use
     optimal_eps: float  # Epsilon when playing optimally
     frame_skip: int  # Every how many frames to process
     learning_rate: float  # Learning rate

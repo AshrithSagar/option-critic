@@ -7,6 +7,7 @@
 - Config inheritance from `ConfigProto`
 - Agents: `ActorCriticAgent` added
 - `oca run` refactored
+- Configured loggers for all available agents, at the very least
 
 ## [v0.2.0] - 2025-04-13
 

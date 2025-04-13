@@ -6,21 +6,22 @@ Logging utilities
 import logging
 import os
 import time
+from typing import Literal
 
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
 
-class Logger:
-    def __init__(self, logdir, run_name):
-        self.log_name = logdir + "/" + run_name
+class BaseLogger:
+    def __init__(self, logdir: str, run_name: str):
+        self.log_name = os.path.join(
+            logdir, run_name.replace(" ", "_").replace("/", "_")
+        )
         self.tf_writer = None
         self.start_time = time.time()
         self.n_eps = 0
 
-        if not os.path.exists(self.log_name):
-            os.makedirs(self.log_name)
-
+        os.makedirs(self.log_name, exist_ok=True)
         self.writer = SummaryWriter(self.log_name)
 
         logging.basicConfig(
@@ -33,11 +34,42 @@ class Logger:
             datefmt="%Y/%m/%d %I:%M:%S %p",
         )
 
+    @property
+    def time_diff(self, format: Literal["h", "m", "s"] = "h") -> float:
+        diff = time.time() - self.start_time
+        if format == "h":
+            return diff / 60 / 60
+        elif format == "m":
+            return diff / 60
+        elif format == "s":
+            return diff
+        raise ValueError("Invalid format")
+
+
+class RegularLogger(BaseLogger):
+    def __init__(self, logdir, run_name):
+        super().__init__(logdir, run_name)
+
+    def log_episode(self, steps, reward):
+        self.n_eps += 1
+        logging.info(
+            f"> ep {self.n_eps} done. total_steps={steps} | reward={reward} "
+            f"| hours={self.time_diff:.3f}"
+        )
+        self.writer.add_scalar(
+            tag="episodic_rewards", scalar_value=reward, global_step=self.n_eps
+        )
+
+
+class OptionsLogger(BaseLogger):
+    def __init__(self, logdir, run_name):
+        super().__init__(logdir, run_name)
+
     def log_episode(self, steps, reward, option_lengths, ep_steps, epsilon):
         self.n_eps += 1
         logging.info(
             f"> ep {self.n_eps} done. total_steps={steps} | reward={reward} | episode_steps={ep_steps} "
-            f"| hours={(time.time()-self.start_time) / 60 / 60:.3f} | epsilon={epsilon:.3f}"
+            f"| hours={self.time_diff:.3f} | epsilon={epsilon:.3f}"
         )
         self.writer.add_scalar(
             tag="episodic_rewards", scalar_value=reward, global_step=self.n_eps
@@ -76,9 +108,10 @@ class Logger:
 
 
 if __name__ == "__main__":
-    logger = Logger(logdir="runs/", run_name="test_model-test_env")
+    logger = OptionsLogger(logdir="runs/", run_name="test_model-test_env")
     steps = 200
     reward = 5
     option_lengths = {opt: np.random.randint(0, 5, size=(5)) for opt in range(5)}
     ep_steps = 50
-    logger.log_episode(steps, reward, option_lengths, ep_steps)
+    epsilon = 0.99
+    logger.log_episode(steps, reward, option_lengths, ep_steps, epsilon)

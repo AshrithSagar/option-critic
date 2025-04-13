@@ -17,7 +17,7 @@ from ..envs.utils import to_tensor
 from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
 from ..utils.experience_replay import ReplayBuffer
-from ..utils.logger import Logger
+from ..utils.logger import OptionsLogger
 
 
 class OptionCriticBase(nn.Module):
@@ -229,7 +229,7 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
     optim = torch.optim.RMSprop(oca.parameters(), lr=args.learning_rate)
 
     buffer = ReplayBuffer(capacity=args.max_history, seed=args.seed)
-    logger = Logger(
+    logger = OptionsLogger(
         logdir=args.logdir,
         run_name=f"{OptionCriticFeatures.__name__}-{args.env}-{args.exp_name}-{time.ctime()}",
     )
