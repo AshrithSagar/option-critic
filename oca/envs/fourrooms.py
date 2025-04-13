@@ -10,6 +10,8 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
+import matplotlib.pyplot as plt
+
 logger = logging.getLogger(__name__)
 
 
@@ -108,11 +110,31 @@ wwwwwwwwwwwww
 
     def render(self, show_goal=True):
         current_grid = np.array(self.occupancy)
+
+        # Mark the agent's current position with -1 (or any other identifier)
         current_grid[self.currentcell[0], self.currentcell[1]] = -1
+
         if show_goal:
+            # Mark the goal's position, can be marked with another unique value, say 2
             goal_cell = self.tocell[self.goal]
-            current_grid[goal_cell[0], goal_cell[1]] = -1
-        return current_grid
+            current_grid[goal_cell[0], goal_cell[1]] = 2
+
+        # If the plot has not been created yet, create it
+        if not hasattr(self, 'im'):  # Check if the im object exists
+            self.fig, self.ax = plt.subplots()
+            self.im = self.ax.imshow(current_grid, cmap='gray', interpolation='nearest')
+            self.ax.set_title("Fourrooms Environment")
+            self.cbar = self.fig.colorbar(self.im, ax=self.ax, label='Grid values')
+            plt.ion()
+        else:
+            # Update the existing plot
+            self.im.set_data(current_grid)
+            self.cbar.update_ticks()  # Update the colorbar ticks if necessary
+
+        # Redraw the updated plot without blocking
+        plt.draw()
+        plt.pause(0.1)  # Pause briefly to allow the plot to update
+        plt.show(block=False)
 
     def step(self, action):
         """

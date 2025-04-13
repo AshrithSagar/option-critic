@@ -106,7 +106,7 @@ class SARSAAgent(nn.Module):
 def run_sarsa(args: ConfigRunProto, env: gym.Env, **kwargs):
     state_dim: int = env.observation_space.shape[0]  # if one-hot state
     action_dim: int = env.action_space.n
-    env = OneHotWrapper(env)
+    # env = OneHotWrapper(env)
 
     agent = SARSAAgent(
         state_dim,

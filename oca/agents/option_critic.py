@@ -110,14 +110,14 @@ class OptionCriticConv(OptionCriticBase):
     For Visual Input (CNN)
     """
 
-    def __init__(self, in_channels, num_actions, num_options, **kwargs):
+    def __init__(self, in_features, num_actions, num_options, **kwargs):
         self.magic_number = 7 * 7 * 64  # Output of CNN
         super().__init__(
             feature_dim=512, num_actions=num_actions, num_options=num_options, **kwargs
         )
 
         self.features = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=8, stride=4),
+            nn.Conv2d(in_features, 32, kernel_size=8, stride=4),
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
@@ -326,8 +326,10 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
             curr_op_len += 1
             obs = next_obs
 
+            env.render()
+
             logger.log_data(steps, actor_loss, critic_loss, entropy.item(), epsilon)
-
-        env.render()
-
+    
         logger.log_episode(steps, rewards, option_lengths, ep_steps, epsilon)
+
+    env.close()

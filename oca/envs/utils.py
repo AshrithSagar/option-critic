@@ -8,6 +8,7 @@ from typing import Tuple
 import gymnasium as gym
 import numpy as np
 import torch
+import ale_py
 from gymnasium.wrappers import (
     AtariPreprocessing,
     FrameStackObservation,
@@ -17,6 +18,7 @@ from numpy.typing import NDArray
 
 from .fourrooms import FourRoomsEnv
 
+gym.register_envs(ale_py)
 
 class LazyFrames(object):
     def __init__(self, frames):
@@ -43,15 +45,21 @@ class FrameStack(FrameStackObservation):
         assert len(self.frames) == self.k
         return LazyFrames(list(self.frames))
 
-
+def is_atari_env(env_id):
+    try:
+        env = gym.make(env_id, render_mode='human')
+        # Check if 'ALE' is in the environment's metadata (typical for Atari)
+        return 'ale' in env.spec.entry_point.lower()
+    except Exception as e:
+        print(f"Error loading environment {env_id}: {e}")
+        return False
+    
 def make_env(env_name: str, **kwargs) -> Tuple[gym.Env, bool]:
     if env_name == "fourrooms":
         return FourRoomsEnv(), False
 
     env = gym.make(env_name, **kwargs)
-    is_atari = hasattr(gym.envs, "atari") and isinstance(
-        env.unwrapped, gym.envs.atari.atari_env.AtariEnv
-    )
+    is_atari = is_atari_env(env_name)
     if is_atari:
         env = AtariPreprocessing(
             env, grayscale_obs=True, scale_obs=True, terminal_on_life_loss=True
