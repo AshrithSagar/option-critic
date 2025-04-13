@@ -3,13 +3,14 @@ oca/utils/config.py \n
 Configuration utilities
 """
 
-from typing import Optional, Protocol
+from typing import Literal, Optional, Protocol
 
 from .constants import runs_dir
 
 
-class ConfigProto(Protocol):
+class ConfigRunProto(Protocol):
     env: str  # ROM to run
+    agent: Literal["OptionCritic", "SARSA"]  # Agent to use
     optimal_eps: float  # Epsilon when playing optimally
     frame_skip: int  # Every how many frames to process
     learning_rate: float  # Learning rate
@@ -24,18 +25,19 @@ class ConfigProto(Protocol):
     termination_reg: float  # Regularization to decrease termination prob
     entropy_reg: float  # Regularization to increase policy entropy
     num_options: int  # Number of options to create
-    temp: float  # Action distribution softmax temperature param
+    temperature: float  # Action distribution softmax temperature param
     max_steps_ep: int  # Number of maximum steps per episode
     max_steps_total: int  # Number of maximum steps in total
     cuda: bool  # Enable CUDA training (recommended if possible)
     seed: int  # Random seed for numpy, torch, random.
     logdir: str  # Directory for logging statistics
-    exp: Optional[str]  # Optional experiment name
+    exp_name: Optional[str]  # Optional experiment name
     switch_goal: bool  # Switch goal after 2k eps
 
 
-class ConfigDefaults(ConfigProto):
+class ConfigRunDefaults(ConfigRunProto):
     env = "CartPole-v1"
+    agent = "OptionCritic"
     optimal_eps = 0.05
     frame_skip = 4
     learning_rate = 0.0005
@@ -50,11 +52,11 @@ class ConfigDefaults(ConfigProto):
     termination_reg = 0.01
     entropy_reg = 0.01
     num_options = 2
-    temp = 1.0
+    temperature = 1.0
     max_steps_ep = 18000
     max_steps_total = int(4e6)
     cuda = True
     seed = 0
     logdir = runs_dir
-    exp = None
+    exp_name = None
     switch_goal = False

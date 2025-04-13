@@ -9,18 +9,17 @@ from copy import deepcopy
 import numpy as np
 import torch
 
-from .envs.utils import make_env, to_tensor
-from .utils.cli import load_config
-from .utils.constants import models_dir
-from .utils.experience_replay import ReplayBuffer
-from .utils.logger import Logger
-from .utils.option_critic import OptionCriticConv, OptionCriticFeatures
-from .utils.option_critic import actor_loss as actor_loss_fn
-from .utils.option_critic import critic_loss as critic_loss_fn
+from ..envs.utils import make_env, to_tensor
+from .config import ConfigRunProto
+from .constants import models_dir
+from .experience_replay import ReplayBuffer
+from .logger import Logger
+from .option_critic import OptionCriticConv, OptionCriticFeatures
+from .option_critic import actor_loss as actor_loss_fn
+from .option_critic import critic_loss as critic_loss_fn
 
 
-def main():
-    args = load_config(verbose=True)
+def main(args: ConfigRunProto):
     env, is_atari = make_env(args.env, render_mode="human")
     option_critic = OptionCriticConv if is_atari else OptionCriticFeatures
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
@@ -29,7 +28,7 @@ def main():
         in_features=env.observation_space.shape[0],
         num_actions=env.action_space.n,
         num_options=args.num_options,
-        temperature=args.temp,
+        temperature=args.temperature,
         eps_start=args.epsilon_start,
         eps_min=args.epsilon_min,
         eps_decay=args.epsilon_decay,
@@ -48,7 +47,7 @@ def main():
     buffer = ReplayBuffer(capacity=args.max_history, seed=args.seed)
     logger = Logger(
         logdir=args.logdir,
-        run_name=f"{OptionCriticFeatures.__name__}-{args.env}-{args.exp}-{time.ctime()}",
+        run_name=f"{OptionCriticFeatures.__name__}-{args.env}-{args.exp_name}-{time.ctime()}",
     )
 
     steps = 0
@@ -148,7 +147,3 @@ def main():
         env.render()
 
         logger.log_episode(steps, rewards, option_lengths, ep_steps, epsilon)
-
-
-if __name__ == "__main__":
-    main()

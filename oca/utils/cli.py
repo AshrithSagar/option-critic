@@ -5,18 +5,21 @@ Command-line interface for loading and overriding configuration settings.
 
 import inspect
 import io
-import sys
 import tokenize
-from typing import Dict, Optional, get_type_hints
+from typing import Dict, Literal, Optional, get_args, get_type_hints
 
 import click
 import yaml
 
-from .config import ConfigDefaults, ConfigProto
+from .config import ConfigRunDefaults, ConfigRunProto
+from .constants import __root__
+from .run import main as run_main
 
 
-def get_config(config_path: Optional[str] = None, **overrides) -> ConfigProto:
-    config = ConfigDefaults()
+def load_config(
+    config_path: Optional[str] = None, verbose: bool = False, **overrides
+) -> ConfigRunProto:
+    config = ConfigRunDefaults()
     # Override defaults with YAML file if provided
     if config_path:
         with open(config_path, "r") as file:
@@ -28,14 +31,19 @@ def get_config(config_path: Optional[str] = None, **overrides) -> ConfigProto:
     for key, value in overrides.items():
         if value is not None and hasattr(config, key):
             setattr(config, key, value)
+    if verbose:
+        print("Configuration:")
+        for key in dir(config):
+            if not key.startswith("_"):
+                print(f"  {key}: {getattr(config, key)}")
     return config
 
 
-def config_options(proto: ConfigProto):
-    """Dynamically generate click options based on ConfigProto's attributes"""
+def config_options(proto: ConfigRunProto):
+    """Dynamically generate click options based on a Protocol's attributes"""
 
     def get_help_text() -> Dict[str, str]:
-        """Extract comments from ConfigProto to use as help text."""
+        """Extract comments from Protocol to use as help text."""
         source = inspect.getsource(proto)
         tokens = tokenize.generate_tokens(io.StringIO(source).readline)
         comments, prev_name, prev_tokval = {}, None, ""
@@ -53,16 +61,20 @@ def config_options(proto: ConfigProto):
         help_text = get_help_text()
         for name, type_hint in reversed(get_type_hints(proto).items()):
             # Map Python types to Click types
-            click_type = {
-                str: str,
-                int: int,
-                float: float,
-                bool: bool,
-                Optional[str]: str,
-                Optional[int]: int,
-                Optional[float]: float,
-                Optional[bool]: bool,
-            }.get(type_hint, str)
+            if hasattr(type_hint, "__origin__") and type_hint.__origin__ is Literal:
+                choices = get_args(type_hint)  # Extract allowed values from Literal
+                click_type = click.Choice(choices)
+            else:
+                click_type = {
+                    str: str,
+                    int: int,
+                    float: float,
+                    bool: bool,
+                    Optional[str]: str,
+                    Optional[int]: int,
+                    Optional[float]: float,
+                    Optional[bool]: bool,
+                }.get(type_hint, str)
 
             # Add a click option for each attribute
             func = click.option(
@@ -76,26 +88,27 @@ def config_options(proto: ConfigProto):
     return decorator
 
 
-def load_config(verbose: bool = False) -> ConfigProto:
-    """Handles CLI arguments and returns the final configuration."""
-
-    @click.command(help="Option Critic Architecture | PyTorch")
-    @config_options(ConfigProto)
-    @click.option(
+def config_path(func):
+    """Decorator to add config_path option to a function."""
+    return click.option(
         "--config-path",
         type=click.Path(exists=True),
         default=None,
         help="Path to the YAML config file.",
-    )
-    def cli(config_path, **kwargs):
-        config = get_config(config_path, **kwargs)
-        if verbose:
-            print("Configuration:")
-            for key in dir(config):
-                if not key.startswith("_"):
-                    print(f"  {key}: {getattr(config, key)}")
-        return config
+    )(func)
 
-    # Early exit if --help
-    standalone_mode = "--help" in sys.argv
-    return cli.main(standalone_mode=standalone_mode)
+
+@click.command()
+@config_options(ConfigRunProto)
+@config_path
+def run(config_path: str, **kwargs):
+    """Run an agent on an environment."""
+    args = load_config(config_path, verbose=True, **kwargs)
+    run_main(args)
+
+
+@click.command()
+@config_path
+def plot(config_path: str, **kwargs):
+    """Plotting utilities."""
+    pass
