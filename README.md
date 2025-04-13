@@ -26,6 +26,10 @@ oca run --help
 oca run --switch-goal True --env fourrooms
 ```
 
+```shell
+oca plot --help
+```
+
 ## References
 
 - <https://github.com/lweitkamp/option-critic-pytorch>

@@ -2,12 +2,18 @@
 
 ## [Unreleased]
 
+## [v0.2.1] - 2025-04-13
+
 ### Changed
 
 - Config inheritance from `ConfigProto`
 - Agents: `ActorCriticAgent` added
 - `oca run` refactored
 - Configured loggers for all available agents, at the very least
+
+### Fixed
+
+- All agents at least run now, with some logging
 
 ## [v0.2.0] - 2025-04-13
 
@@ -26,6 +32,7 @@
 - Core functionality from <https://github.com/lweitkamp/option-critic-pytorch>
 - Setup, config and cli configured
 
-[unreleased]: https://github.com/AshrithSagar/option-critic/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/AshrithSagar/option-critic/compare/v0.2.1...HEAD
+[v0.2.1]: https://github.com/AshrithSagar/option-critic/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/AshrithSagar/option-critic/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/AshrithSagar/option-critic/releases/tag/v0.1.0
