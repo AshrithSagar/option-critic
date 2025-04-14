@@ -35,6 +35,10 @@ Environments (not limited to, but tested on these):
 
 - `FourRooms-v0`
 - `AsterixNoFrameskip-v4`
+- `MsPacmanNoFrameskip-v4`
+- `SeaquestNoFrameskip-v4`
+- `ZaxxonNoFrameskip-v4`
+- `CartPole-v1`
 
 To check logs in tensorboard
 
