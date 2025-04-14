@@ -12,7 +12,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import Bernoulli, Categorical
+from torch.types import Tensor
 
+from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import to_tensor
 from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
@@ -236,7 +238,8 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
 
     steps = 0
     if args.switch_goal:
-        print(f"Current goal {env.goal}")
+        assert isinstance(env.unwrapped, FourRoomsEnv)
+        print(f"Current goal {env.unwrapped.goal}")
     while steps < args.max_steps_total:
         rewards = 0
         option_lengths = {opt: [] for opt in range(args.num_options)}
@@ -251,15 +254,15 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
         # should be finedtuned (this is what we would hope).
         if args.switch_goal and logger.n_eps == 1000:
             torch.save(
-                {"model_params": oca.state_dict(), "goal_state": env.goal},
+                {"model_params": oca.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/oca_seed={args.seed}_1k",
             )
-            env.switch_goal()
-            print(f"New goal {env.goal}")
+            env.unwrapped.switch_goal()
+            print(f"New goal {env.unwrapped.goal}")
 
         if args.switch_goal and logger.n_eps > 2000:
             torch.save(
-                {"model_params": oca.state_dict(), "goal_state": env.goal},
+                {"model_params": oca.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/oca_seed={args.seed}_2k",
             )
             break
@@ -300,7 +303,7 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
                     oca_prime,
                     args,
                 )
-                loss = actor_loss
+                loss: Tensor = actor_loss
 
                 if steps % args.update_frequency == 0:
                     data_batch = buffer.sample(args.batch_size)
@@ -329,7 +332,7 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
             env.render()
 
             logger.log_data(steps, actor_loss, critic_loss, entropy.item(), epsilon)
-    
+
         logger.log_episode(steps, rewards, option_lengths, ep_steps, epsilon)
 
     env.close()

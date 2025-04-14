@@ -16,9 +16,11 @@ from gymnasium.wrappers import (
 )
 from numpy.typing import NDArray
 
-from .fourrooms import FourRoomsEnv
+import oca.envs.register_envs as custom_envs
 
+# Optional to include, since already registered by default
 gym.register_envs(ale_py)
+gym.register_envs(custom_envs)
 
 
 class LazyFrames(object):
@@ -58,9 +60,6 @@ def is_atari_env(env_id):
 
 
 def make_env(env_name: str, **kwargs) -> Tuple[gym.Env, bool]:
-    if env_name == "fourrooms":
-        return FourRoomsEnv(**kwargs), False
-
     env = gym.make(env_name, **kwargs)
     is_atari = is_atari_env(env_name)
     if is_atari:

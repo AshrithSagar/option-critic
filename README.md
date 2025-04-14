@@ -23,7 +23,7 @@ oca run --help
 ```
 
 ```shell
-oca run --switch-goal True --env fourrooms
+oca run --switch-goal True --env FourRooms-v0
 ```
 
 ```shell

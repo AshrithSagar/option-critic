@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+
+- fourrooms `render_args` added
+
+### Changed
+
+- Custom env `FourRooms-v0` registered
+
+### Fixed
+
+- fourrooms `step` follows gymnasium return signature
+
 ## [v0.2.1] - 2025-04-13
 
 ### Changed

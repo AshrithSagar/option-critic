@@ -75,9 +75,10 @@ wwwwwwwwwwwww
         self.init_states.remove(self.goal)
         self.ep_steps = 0
 
-        self.render_args = {
+        self.render_args = kwargs["render_args"] or {
             "show_goal": True,
             "force_update": True,
+            "pause_delay": 1e-3,
         }
 
     def empty_around(self, cell):
@@ -109,7 +110,7 @@ wwwwwwwwwwwww
         assert self.goal not in self.init_states
 
     def get_state(self, state):
-        s = np.zeros(self.observation_space.shape[0])
+        s = np.zeros(self.observation_space.shape[0], dtype=np.float32)
         s[state] = 1
         return s
 
@@ -138,7 +139,9 @@ wwwwwwwwwwwww
 
         if self.render_args["force_update"]:
             plt.draw()  # Redraw the updated plot without blocking
-            plt.pause(1e-4)  # Pause briefly to allow the plot to update
+            plt.pause(
+                self.render_args["pause_delay"]
+            )  # Pause briefly to allow the plot to update
             plt.show(block=False)
 
     def step(self, action):
@@ -166,7 +169,9 @@ wwwwwwwwwwwww
         reward = float(done)
 
         if not done and self.ep_steps >= 1000:
-            done = True
+            truncated = True
             reward = 0.0
+        else:
+            truncated = False
 
-        return self.get_state(state), reward, done, None, None
+        return self.get_state(state), reward, done, truncated, {}
