@@ -60,14 +60,17 @@ def is_atari_env(env_id):
 
 
 def make_env(env_name: str, **kwargs) -> Tuple[gym.Env, bool]:
-    env = gym.make(env_name, **kwargs)
     is_atari = is_atari_env(env_name)
+
+    env = gym.make(env_name, **kwargs)
+
     if is_atari:
         env = AtariPreprocessing(
             env, grayscale_obs=True, scale_obs=True, terminal_on_life_loss=True
         )
         env = TransformReward(env, lambda r: np.clip(r, -1, 1))
         env = FrameStack(env, 4)
+
     return env, is_atari
 
 

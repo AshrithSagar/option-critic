@@ -18,17 +18,20 @@ The list of dependencies are available [here](requirements.txt), which are autom
 
 ## Usage
 
+See all the available config options using
+
 ```shell
 oca run --help
 ```
 
-```shell
-oca run --switch-goal --env FourRooms-v0
-```
+Check [`ConfigRunDefaults`](oca/utils/config.py) for the base defaults.
+Specify any overrides using CLI arguments.
 
 ```shell
-oca run --switch-goal --env FourRooms-v0 --render-mode human --eval
+oca run --switch-goal --env FourRooms-v0 --agent OptionCritic
 ```
+
+### Plots
 
 ```shell
 oca plot --help

@@ -2,6 +2,7 @@ ale-py
 click
 gymnasium
 gymnasium[atari]
+gymnasium[other]
 matplotlib
 minigrid
 numpy
