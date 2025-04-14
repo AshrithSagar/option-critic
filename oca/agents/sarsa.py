@@ -133,7 +133,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
                 {"model_params": agent.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/sarsa_seed={args.seed}_1k",
             )
-            env.switch_goal()
+            env.unwrapped.switch_goal()
             print(f"New goal {env.unwrapped.goal}")
 
         if args.switch_goal and logger.n_eps > 2000:
