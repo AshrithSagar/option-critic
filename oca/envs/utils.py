@@ -23,7 +23,7 @@ gym.register_envs(ale_py)
 gym.register_envs(custom_envs)
 
 
-class LazyFrames(object):
+class LazyFrames:
     def __init__(self, frames):
         self._frames = frames
 
@@ -49,13 +49,13 @@ class FrameStack(FrameStackObservation):
         return LazyFrames(list(self.frames))
 
 
-def is_atari_env(env_id):
+def is_atari_env(env_name: str) -> bool:
     try:
-        env = gym.make(env_id, render_mode="human")
+        env = gym.make(env_name, render_mode="human")
         # Check if 'ALE' is in the environment's metadata (typical for Atari)
         return "ale" in env.spec.entry_point.lower()
     except Exception as e:
-        print(f"Error loading environment {env_id}: {e}")
+        print(f"Error loading environment {env_name}: {e}")
         return False
 
 
