@@ -49,22 +49,11 @@ class FrameStack(FrameStackObservation):
         return LazyFrames(list(self.frames))
 
 
-def is_atari_env(env_name: str) -> bool:
-    try:
-        env = gym.make(env_name, render_mode="human")
-        # Check if 'ALE' is in the environment's metadata (typical for Atari)
-        return "ale" in env.spec.entry_point.lower()
-    except Exception as e:
-        print(f"Error loading environment {env_name}: {e}")
-        return False
-
-
 def make_env(env_name: str, **kwargs) -> Tuple[gym.Env, bool]:
-    is_atari = is_atari_env(env_name)
-
     env = gym.make(env_name, **kwargs)
 
-    if is_atari:
+    # Check if 'ALE' is in the environment's metadata (typical for Atari)
+    if is_atari := "ale" in env.spec.entry_point.lower():
         env = AtariPreprocessing(
             env, grayscale_obs=True, scale_obs=True, terminal_on_life_loss=True
         )
