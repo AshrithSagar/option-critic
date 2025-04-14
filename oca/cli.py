@@ -5,7 +5,7 @@ Main command-line interface
 
 import click
 
-from .utils.cli import plot, run
+from .utils.cli import evaluate, plot, run
 from .utils.constants import __version__
 
 
@@ -17,4 +17,5 @@ def oca():
 
 
 oca.add_command(run)
+oca.add_command(evaluate)
 oca.add_command(plot)

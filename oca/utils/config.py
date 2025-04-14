@@ -68,6 +68,17 @@ class ConfigRunDefaults(ConfigRunProto):
     switch_goal = False
 
 
+class ConfigEvalProto(ConfigRunProto):
+    model_path: str  # Path to the model to evaluate
+    num_episodes: int  # Number of episodes to evaluate
+
+
+class ConfigEvalDefaults(ConfigRunDefaults):
+    model_path = ""
+    num_episodes = 10
+    render_mode = "human"
+
+
 class ConfigPlotsProto(ConfigProto):
     run_name: str  # Name of the run folder
     logdir: str  # Directory where logs were saved

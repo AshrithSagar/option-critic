@@ -6,6 +6,7 @@
 
 - fourrooms `render_args` added
 - cli handle `Optional[Literal]` types
+- model evaluation support
 
 ### Changed
 

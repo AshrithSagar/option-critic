@@ -3,20 +3,19 @@ oca/agents/utils.py \n
 Utility functions for the agents
 """
 
-from .acpg import run_acpg
-from .option_critic import run_oca
-from .sarsa import run_sarsa
 
-
-def get_agent_run(agent_name: str):
-    """
-    Get the agent run function based on the agent name.
-    """
+def get_agent_meth(meth: str, agent_name: str):
+    """Get the agent method based on the agent name."""
     if agent_name == "OptionCritic":
-        return run_oca
+        from .option_critic import evaluate, run
     elif agent_name == "SARSA":
-        return run_sarsa
+        from .sarsa import run
     elif agent_name == "ACPG":
-        return run_acpg
+        from .acpg import run
     else:
         raise ValueError(f"Agent {agent_name} not found.")
+
+    try:
+        return {"run": run, "evaluate": evaluate}[meth]
+    except KeyError:
+        raise ValueError(f"Method {meth} not found for agent {agent_name}.")

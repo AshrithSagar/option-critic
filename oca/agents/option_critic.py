@@ -16,7 +16,7 @@ from torch.types import Tensor
 
 from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import to_tensor
-from ..utils.config import ConfigRunProto
+from ..utils.config import ConfigEvalProto, ConfigRunProto
 from ..utils.constants import models_dir
 from ..utils.experience_replay import ReplayBuffer
 from ..utils.logger import OptionsLogger
@@ -212,7 +212,7 @@ def actor_loss_fn(
     return actor_loss
 
 
-def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
+def run(args: ConfigRunProto, env: gym.Env, **kwargs):
     option_critic = OptionCriticConv if kwargs["is_atari"] else OptionCriticFeatures
     oca = option_critic(
         in_features=env.observation_space.shape[0],
@@ -334,5 +334,44 @@ def run_oca(args: ConfigRunProto, env: gym.Env, **kwargs):
             logger.log_data(steps, actor_loss, critic_loss, entropy.item(), epsilon)
 
         logger.log_episode(steps, rewards, option_lengths, ep_steps, epsilon)
+
+    env.close()
+
+
+def evaluate(args: ConfigEvalProto, env: gym.Env, **kwargs):
+    option_critic = OptionCriticConv if kwargs["is_atari"] else OptionCriticFeatures
+    model = option_critic(
+        in_features=env.observation_space.shape[0],
+        num_actions=env.action_space.n,
+        num_options=args.num_options,
+        temperature=args.temperature,
+        eps_start=args.epsilon_start,
+        eps_min=args.epsilon_min,
+        eps_decay=args.epsilon_decay,
+        eps_test=args.optimal_eps,
+        device=kwargs["device"],
+    )
+    checkpoint = torch.load(args.model_path, map_location=model.device)
+    model.load_state_dict(checkpoint["model_params"])
+    model.eval()
+
+    for ep in range(args.num_episodes):
+        obs, _ = env.reset()
+        state = model.get_state(
+            torch.tensor(obs, dtype=torch.float32, device=model.device)
+        )
+        term, trunc = False, False
+        total_reward = 0
+
+        while not (term or trunc):
+            env.render()
+            option = model.greedy_option(state)
+            action, _, _ = model.get_action(state, option)
+            next_obs, reward, term, trunc, _ = env.step(action)
+            total_reward += reward
+            state = model.get_state(
+                torch.tensor(next_obs, dtype=torch.float32, device=model.device)
+            )
+        print(f"Episode {ep + 1}: Total Reward = {total_reward}")
 
     env.close()

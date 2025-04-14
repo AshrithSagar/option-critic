@@ -1,6 +1,6 @@
 """
-oca/run.py \n
-Option-Critic Architecture
+oca/evaluate.py \n
+Evaluate a trained agent
 """
 
 import numpy as np
@@ -8,10 +8,10 @@ import torch
 
 from ..agents.utils import get_agent_meth
 from ..envs.utils import make_env
-from .config import ConfigRunProto
+from .config import ConfigEvalProto
 
 
-def main(args: ConfigRunProto):
+def main(args: ConfigEvalProto):
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
     env, is_atari = make_env(args.env, render_mode=args.render_mode)
@@ -20,5 +20,5 @@ def main(args: ConfigRunProto):
     torch.manual_seed(args.seed)
     env.reset(seed=args.seed)
 
-    run = get_agent_meth("run", args.agent)
-    run(args, env, device=device, is_atari=is_atari)
+    evaluate = get_agent_meth("evaluate", args.agent)
+    evaluate(args, env, device=device, is_atari=is_atari)
