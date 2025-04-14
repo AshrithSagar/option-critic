@@ -31,6 +31,12 @@ Specify any overrides using CLI arguments.
 oca run --switch-goal --env FourRooms-v0 --agent OptionCritic
 ```
 
+To check logs in tensorboard
+
+```shell
+tensorboard --logdir=./oca/experiments/runs/{run_name}
+```
+
 ### Plots
 
 ```shell
