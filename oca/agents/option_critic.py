@@ -212,9 +212,9 @@ def actor_loss_fn(
     return actor_loss
 
 
-def run(args: ConfigRunProto, env: gym.Env, **kwargs):
+def _get_model(args: ConfigRunProto, env: gym.Env, **kwargs):
     option_critic = OptionCriticConv if kwargs["is_atari"] else OptionCriticFeatures
-    oca = option_critic(
+    model = option_critic(
         in_features=env.observation_space.shape[0],
         num_actions=env.action_space.n,
         num_options=args.num_options,
@@ -225,10 +225,16 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
         eps_test=args.optimal_eps,
         device=kwargs["device"],
     )
-    # Create a prime network for more stable Q values
-    oca_prime = deepcopy(oca)
+    return model
 
-    optim = torch.optim.RMSprop(oca.parameters(), lr=args.learning_rate)
+
+def run(args: ConfigRunProto, env: gym.Env, **kwargs):
+    model = _get_model(args, env, **kwargs)
+
+    # Create a prime network for more stable Q values
+    model_prime = deepcopy(model)
+
+    optim = torch.optim.RMSprop(model.parameters(), lr=args.learning_rate)
 
     buffer = ReplayBuffer(capacity=args.max_history, seed=args.seed)
     logger = OptionsLogger(
@@ -245,8 +251,8 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
         option_lengths = {opt: [] for opt in range(args.num_options)}
 
         obs, _ = env.reset()
-        state = oca.get_state(to_tensor(obs))
-        greedy_option = oca.greedy_option(state)
+        state = model.get_state(to_tensor(obs))
+        greedy_option = model.greedy_option(state)
         current_option = 0
 
         # Goal switching experiment: run for 1k episodes in fourrooms, switch goals and run for another
@@ -254,7 +260,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
         # should be finedtuned (this is what we would hope).
         if args.switch_goal and logger.n_eps == 1000:
             torch.save(
-                {"model_params": oca.state_dict(), "goal_state": env.unwrapped.goal},
+                {"model_params": model.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/oca_seed={args.seed}_1k",
             )
             env.unwrapped.switch_goal()
@@ -262,7 +268,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
 
         if args.switch_goal and logger.n_eps > 2000:
             torch.save(
-                {"model_params": oca.state_dict(), "goal_state": env.unwrapped.goal},
+                {"model_params": model.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/oca_seed={args.seed}_2k",
             )
             break
@@ -272,7 +278,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
         option_termination = True
         curr_op_len = 0
         while not done and ep_steps < args.max_steps_ep:
-            epsilon = oca.epsilon
+            epsilon = model.epsilon
 
             if option_termination:
                 option_lengths[current_option].append(curr_op_len)
@@ -283,7 +289,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
                 )
                 curr_op_len = 0
 
-            action, logp, entropy = oca.get_action(state, current_option)
+            action, logp, entropy = model.get_action(state, current_option)
 
             next_obs, reward, done, _, _ = env.step(action)
             buffer.push(obs, current_option, reward, next_obs, done)
@@ -299,15 +305,15 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
                     reward,
                     done,
                     next_obs,
-                    oca,
-                    oca_prime,
+                    model,
+                    model_prime,
                     args,
                 )
                 loss: Tensor = actor_loss
 
                 if steps % args.update_frequency == 0:
                     data_batch = buffer.sample(args.batch_size)
-                    critic_loss = critic_loss_fn(oca, oca_prime, data_batch, args)
+                    critic_loss = critic_loss_fn(model, model_prime, data_batch, args)
                     loss += critic_loss
 
                 optim.zero_grad()
@@ -315,13 +321,13 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
                 optim.step()
 
                 if steps % args.freeze_interval == 0:
-                    oca_prime.load_state_dict(oca.state_dict())
+                    model_prime.load_state_dict(model.state_dict())
 
-            state = oca.get_state(to_tensor(next_obs))
+            state = model.get_state(to_tensor(next_obs))
             (
                 option_termination,
                 greedy_option,
-            ) = oca.predict_option_termination(state, current_option)
+            ) = model.predict_option_termination(state, current_option)
 
             # update global steps etc
             steps += 1
@@ -339,18 +345,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
 
 
 def evaluate(args: ConfigRunProto, env: gym.Env, **kwargs):
-    option_critic = OptionCriticConv if kwargs["is_atari"] else OptionCriticFeatures
-    model = option_critic(
-        in_features=env.observation_space.shape[0],
-        num_actions=env.action_space.n,
-        num_options=args.num_options,
-        temperature=args.temperature,
-        eps_start=args.epsilon_start,
-        eps_min=args.epsilon_min,
-        eps_decay=args.epsilon_decay,
-        eps_test=args.optimal_eps,
-        device=kwargs["device"],
-    )
+    model = _get_model(args, env, **kwargs)
     checkpoint = torch.load(args.model_path, map_location=model.device)
     model.load_state_dict(checkpoint["model_params"])
     model.eval()
