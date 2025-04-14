@@ -2,11 +2,13 @@
 
 ## [Unreleased]
 
+## [v0.2.2] - 2025-04-14
+
 ### Added
 
 - fourrooms `render_args` added
 - cli handle `Optional[Literal]` types
-- model evaluation support
+- model evaluation support; `oca run --eval`
 
 ### Changed
 
@@ -46,7 +48,8 @@
 - Core functionality from <https://github.com/lweitkamp/option-critic-pytorch>
 - Setup, config and cli configured
 
-[unreleased]: https://github.com/AshrithSagar/option-critic/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/AshrithSagar/option-critic/compare/v0.2.2...HEAD
+[v0.2.2]: https://github.com/AshrithSagar/option-critic/compare/v0.2.1...v0.2.2
 [v0.2.1]: https://github.com/AshrithSagar/option-critic/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/AshrithSagar/option-critic/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/AshrithSagar/option-critic/releases/tag/v0.1.0

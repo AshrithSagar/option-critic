@@ -23,7 +23,11 @@ oca run --help
 ```
 
 ```shell
-oca run --switch-goal True --env FourRooms-v0 --render-mode human
+oca run --switch-goal --env FourRooms-v0
+```
+
+```shell
+oca run --switch-goal --env FourRooms-v0 --render-mode human --eval
 ```
 
 ```shell
