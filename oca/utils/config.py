@@ -11,6 +11,10 @@ from .constants import runs_dir
 class ConfigProto(Protocol):
     logdir: str  # Directory for logging statistics
 
+    def _to_dict(self) -> dict:
+        """Convert the configuration to a dictionary."""
+        return {k: getattr(self, k) for k in dir(self) if not k.startswith("_")}
+
 
 class ConfigRunProto(ConfigProto):
     env: str  # ROM to run

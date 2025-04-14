@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Save configs in `{runs_dir}/{run_name}`
+
 ## [v0.2.2] - 2025-04-14
 
 ### Added

@@ -9,6 +9,7 @@ import tokenize
 from typing import Callable, Dict, Literal, Optional, Union, get_args, get_type_hints
 
 import click
+import toml
 import yaml
 
 from .config import (
@@ -29,24 +30,31 @@ def load_config(
     verbose: bool = False,
     **overrides,
 ) -> ConfigProto:
-    config = defaults()
+    args = defaults()
     # Override defaults with YAML file if provided
     if config_path:
         with open(config_path, "r") as file:
             config_dict: Dict = yaml.safe_load(file)
             for key, value in config_dict.items():
-                if hasattr(config, key):
-                    setattr(config, key, value)
+                if hasattr(args, key):
+                    setattr(args, key, value)
     # Override with command-line arguments
     for key, value in overrides.items():
-        if value is not None and hasattr(config, key):
-            setattr(config, key, value)
+        if value is not None and hasattr(args, key):
+            setattr(args, key, value)
+    args: ConfigProto
     if verbose:
         print("Configuration:")
-        for key in dir(config):
-            if not key.startswith("_"):
-                print(f"  {key}: {getattr(config, key)}")
-    return config
+        for key in sorted(args._to_dict().keys()):
+            print(f"  {key}: {getattr(args, key)}")
+    return args
+
+
+def save_config(args: ConfigProto, save_path: str, file_type: str = "yaml") -> None:
+    """Save the configuration. Support yaml/toml formats."""
+    dump = yaml.dump if file_type == "yaml" else toml.dump
+    with open(save_path, "w") as file:
+        dump(args._to_dict(), file)
 
 
 def config_options(proto: ConfigProto) -> Callable:

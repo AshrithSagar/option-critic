@@ -9,4 +9,5 @@ numpy
 pyyaml
 tensorboard
 tensorboard
+toml
 torch

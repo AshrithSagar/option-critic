@@ -3,6 +3,7 @@ oca/utils/option_critic.py \n
 Option Critic Architecture
 """
 
+import os
 import time
 from copy import deepcopy
 from math import exp
@@ -17,6 +18,7 @@ from torch.types import Tensor
 
 from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import to_tensor
+from ..utils.cli import save_config
 from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
 from ..utils.experience_replay import ReplayBuffer
@@ -250,10 +252,11 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
     optim = torch.optim.RMSprop(model.parameters(), lr=args.learning_rate)
 
     buffer = ReplayBuffer(capacity=args.max_history, seed=args.seed)
-    logger = OptionsLogger(
-        logdir=args.logdir,
-        run_name=f"{OptionCriticFeatures.__name__}-{args.env}-{args.exp_name}-{time.ctime()}",
+    run_name = (
+        f"{OptionCriticFeatures.__name__}-{args.env}-{args.exp_name}-{time.ctime()}"
     )
+    logger = OptionsLogger(logdir=args.logdir, run_name=run_name)
+    save_config(args, os.path.join(logger.log_name, "config.yaml"))
 
     steps = 0
     if args.switch_goal:
