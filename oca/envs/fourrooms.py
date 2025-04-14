@@ -7,11 +7,11 @@ import logging
 from typing import Any
 
 import gymnasium as gym
+import matplotlib.pyplot as plt
 import numpy as np
 from gymnasium import spaces
 
-import matplotlib.pyplot as plt
-
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -24,7 +24,7 @@ class FourRoomsEnv(gym.Env):
         "torch": True,
     }
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         layout = """\
 wwwwwwwwwwwww
 w     w     w
@@ -75,6 +75,11 @@ wwwwwwwwwwwww
         self.init_states.remove(self.goal)
         self.ep_steps = 0
 
+        self.render_args = {
+            "show_goal": True,
+            "force_update": True,
+        }
+
     def empty_around(self, cell):
         avail = []
         for action in range(self.action_space.n):
@@ -108,33 +113,33 @@ wwwwwwwwwwwww
         s[state] = 1
         return s
 
-    def render(self, show_goal=True):
+    def render(self):
         current_grid = np.array(self.occupancy)
 
         # Mark the agent's current position with -1 (or any other identifier)
         current_grid[self.currentcell[0], self.currentcell[1]] = -1
 
-        if show_goal:
-            # Mark the goal's position, can be marked with another unique value, say 2
+        if self.render_args["show_goal"]:
+            # Mark goal's position
             goal_cell = self.tocell[self.goal]
             current_grid[goal_cell[0], goal_cell[1]] = 2
 
         # If the plot has not been created yet, create it
-        if not hasattr(self, 'im'):  # Check if the im object exists
+        if not hasattr(self, "im"):  # Check if the im object exists
             self.fig, self.ax = plt.subplots()
-            self.im = self.ax.imshow(current_grid, cmap='gray', interpolation='nearest')
+            self.im = self.ax.imshow(current_grid, cmap="gray", interpolation="nearest")
             self.ax.set_title("Fourrooms Environment")
-            self.cbar = self.fig.colorbar(self.im, ax=self.ax, label='Grid values')
+            self.cbar = self.fig.colorbar(self.im, ax=self.ax, label="Grid values")
             plt.ion()
-        else:
-            # Update the existing plot
+        elif self.render_args["force_update"]:
+            # Update the existing plot only if force_update is True
             self.im.set_data(current_grid)
             self.cbar.update_ticks()  # Update the colorbar ticks if necessary
 
-        # Redraw the updated plot without blocking
-        plt.draw()
-        plt.pause(0.1)  # Pause briefly to allow the plot to update
-        plt.show(block=False)
+        if self.render_args["force_update"]:
+            plt.draw()  # Redraw the updated plot without blocking
+            plt.pause(1e-4)  # Pause briefly to allow the plot to update
+            plt.show(block=False)
 
     def step(self, action):
         """
