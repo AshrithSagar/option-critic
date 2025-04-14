@@ -11,6 +11,7 @@ import gymnasium as gym
 import numpy as np
 import torch
 import torch.nn as nn
+from numpy.typing import NDArray
 from torch.distributions import Bernoulli, Categorical
 from torch.types import Tensor
 
@@ -57,6 +58,7 @@ class OptionCriticBase(nn.Module):
             torch.zeros(num_options, feature_dim, num_actions)
         )
         self.options_b = nn.Parameter(torch.zeros(num_options, num_actions))
+        self.features: nn.Module
 
         self.to(device)
         self.train(not testing)
@@ -64,7 +66,7 @@ class OptionCriticBase(nn.Module):
     def get_Q(self, state):
         return self.Q(state)
 
-    def get_terminations(self, state):
+    def get_terminations(self, state: Tensor) -> Tensor:
         return self.terminations(state).sigmoid()
 
     def predict_option_termination(self, state, current_option):
@@ -100,7 +102,7 @@ class OptionCriticBase(nn.Module):
             eps = self.eps_test
         return eps
 
-    def get_state(self, obs):
+    def get_state(self, obs: Tensor) -> Tensor:
         if obs.ndim < 4:
             obs = obs.unsqueeze(0)
         obs = obs.to(self.device)
@@ -149,7 +151,9 @@ class OptionCriticFeatures(OptionCriticBase):
         )
 
 
-def critic_loss_fn(model, model_prime, data_batch, args):
+def critic_loss_fn(
+    model: OptionCriticBase, model_prime, data_batch, args: ConfigRunProto
+):
     obs, options, rewards, next_obs, dones = data_batch
     batch_idx = torch.arange(len(options)).long()
     options = torch.LongTensor(options).to(model.device)
@@ -181,7 +185,16 @@ def critic_loss_fn(model, model_prime, data_batch, args):
 
 
 def actor_loss_fn(
-    obs, option, logp, entropy, reward, done, next_obs, model, model_prime, args
+    obs: NDArray,
+    option: int,
+    logp: float,
+    entropy: float,
+    reward: float,
+    done: bool,
+    next_obs: NDArray,
+    model: OptionCriticBase,
+    model_prime: OptionCriticBase,
+    args: ConfigRunProto,
 ):
     state = model.get_state(to_tensor(obs))
     next_state = model.get_state(to_tensor(next_obs))
