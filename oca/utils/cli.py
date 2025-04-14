@@ -71,6 +71,7 @@ def config_options(proto: ConfigProto) -> Callable:
         help_text = get_help_text()
         for name, type_hint in reversed(get_type_hints(proto).items()):
             # Map Python types to Click types
+            default, kwargs = None, {}
             if hasattr(type_hint, "__origin__"):
                 args = get_args(type_hint)
                 if type_hint.__origin__ is Literal:
@@ -90,19 +91,23 @@ def config_options(proto: ConfigProto) -> Callable:
                     str: click.STRING,
                     int: click.INT,
                     float: click.FLOAT,
-                    bool: click.BOOL,
                     Optional[str]: click.STRING,
                     Optional[int]: click.INT,
                     Optional[float]: click.FLOAT,
-                    Optional[bool]: click.BOOL,
                 }.get(type_hint, str)
+
+                if type_hint is bool or type_hint == Optional[bool]:
+                    click_type = click.BOOL
+                    default = False
+                    kwargs = {"is_flag": True}
 
             # Add a click option for each attribute
             func = click.option(
                 f"--{name.replace('_', '-')}",
                 type=click_type,
-                default=None,
+                default=default,
                 help=help_text.get(name),
+                **kwargs,
             )(func)
         return func
 
