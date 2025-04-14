@@ -14,7 +14,7 @@ from .config import ConfigRunProto
 def main(args: ConfigRunProto):
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
-    env, is_atari = make_env(args.env, render_mode="human")
+    env, is_atari = make_env(args.env, render_mode=args.render_mode)
 
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)

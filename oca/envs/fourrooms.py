@@ -75,6 +75,7 @@ wwwwwwwwwwwww
         self.init_states.remove(self.goal)
         self.ep_steps = 0
 
+        self.render_mode = kwargs.get("render_mode", None)
         self.render_args = kwargs["render_args"] or {
             "show_goal": True,
             "force_update": True,
@@ -115,6 +116,10 @@ wwwwwwwwwwwww
         return s
 
     def render(self):
+        if self.render_mode == "human":
+            self.render_human()
+
+    def render_human(self):
         current_grid = np.array(self.occupancy)
 
         # Mark the agent's current position with -1 (or any other identifier)

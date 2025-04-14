@@ -14,6 +14,7 @@ class ConfigProto(Protocol):
 
 class ConfigRunProto(ConfigProto):
     env: str  # ROM to run
+    render_mode: Optional[Literal["human", "rgb_array"]]  # Render mode
     agent: Literal["OptionCritic", "SARSA", "ACPG"]  # Agent to use
     optimal_eps: float  # Epsilon when playing optimally
     frame_skip: int  # Every how many frames to process
@@ -41,6 +42,7 @@ class ConfigRunProto(ConfigProto):
 
 class ConfigRunDefaults(ConfigRunProto):
     env = "CartPole-v1"
+    render_mode = None
     agent = "OptionCritic"
     optimal_eps = 0.05
     frame_skip = 4
