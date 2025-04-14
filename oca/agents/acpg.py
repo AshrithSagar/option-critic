@@ -128,22 +128,22 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
 
     ep = 0
     if args.switch_goal:
-        env: FourRoomsEnv
-        print(f"Current goal {env.goal}")
+        assert isinstance(env.unwrapped, FourRoomsEnv)
+        print(f"Current goal {env.unwrapped.goal}")
     while ep < args.max_steps_total:
         reward = agent.train_episode(env)
 
         if args.switch_goal and logger.n_eps == 1000:
             torch.save(
-                {"model_params": agent.state_dict(), "goal_state": env.goal},
+                {"model_params": agent.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/acpg_seed={args.seed}_1k",
             )
             env.switch_goal()
-            print(f"New goal {env.goal}")
+            print(f"New goal {env.unwrapped.goal}")
 
         if args.switch_goal and logger.n_eps > 2000:
             torch.save(
-                {"model_params": agent.state_dict(), "goal_state": env.goal},
+                {"model_params": agent.state_dict(), "goal_state": env.unwrapped.goal},
                 f"{models_dir}/acpg_seed={args.seed}_2k",
             )
             break
