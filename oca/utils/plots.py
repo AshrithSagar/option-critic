@@ -46,10 +46,14 @@ def plot_steps_vs_episodes(args: ConfigPlotsProto):
     plt.xlabel("Episodes")
     plt.ylabel("Steps")
     plt.grid(True, linestyle=":")
+    plt.tight_layout()
 
-    if args.save_path:
-        plt.savefig(args.save_path)
-        print(f"Plot saved to {args.save_path}")
+    if args.save or args.save_path:
+        save_path = args.save_path or os.path.join(
+            args.logdir, args.run_name, "steps_vs_episodes.png"
+        )
+        plt.savefig(save_path)
+        print(f"Plot saved to {save_path}")
     else:
         plt.show()
 

@@ -78,6 +78,7 @@ class ConfigPlotsProto(ConfigProto):
     run_name: str  # Name of the run folder
     logdir: str  # Directory where logs were saved
     smooth_window: int  # Window size for smoothing
+    save: bool  # Save the plot in default place, else just show
     save_path: Optional[str]  # Optional path to save the plot
 
 
@@ -85,4 +86,5 @@ class ConfigPlotsDefaults(ConfigPlotsProto):
     run_name: str = ""
     logdir = runs_dir
     smooth_window = 10
+    save = False
     save_path = None
