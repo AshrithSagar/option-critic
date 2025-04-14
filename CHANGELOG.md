@@ -5,6 +5,7 @@
 ### Added
 
 - fourrooms `render_args` added
+- cli handle `Optional[Literal]` types
 
 ### Changed
 

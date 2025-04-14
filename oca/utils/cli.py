@@ -6,7 +6,7 @@ Command-line interface for loading and overriding configuration settings.
 import inspect
 import io
 import tokenize
-from typing import Callable, Dict, Literal, Optional, get_args, get_type_hints
+from typing import Callable, Dict, Literal, Optional, Union, get_args, get_type_hints
 
 import click
 import yaml
@@ -71,19 +71,30 @@ def config_options(proto: ConfigProto) -> Callable:
         help_text = get_help_text()
         for name, type_hint in reversed(get_type_hints(proto).items()):
             # Map Python types to Click types
-            if hasattr(type_hint, "__origin__") and type_hint.__origin__ is Literal:
-                choices = get_args(type_hint)  # Extract allowed values from Literal
-                click_type = click.Choice(choices)
+            if hasattr(type_hint, "__origin__"):
+                args = get_args(type_hint)
+                if type_hint.__origin__ is Literal:
+                    click_type = click.Choice(args)
+                elif type_hint.__origin__ is Union and type(None) in args:
+                    literal_args = [arg for arg in args if arg is not type(None)]
+                    click_type = (
+                        click.Choice(get_args(literal_args[0]))
+                        if len(literal_args) == 1
+                        and getattr(literal_args[0], "__origin__", None) is Literal
+                        else str
+                    )
+                else:
+                    click_type = click.STRING
             else:
                 click_type = {
-                    str: str,
-                    int: int,
-                    float: float,
-                    bool: bool,
-                    Optional[str]: str,
-                    Optional[int]: int,
-                    Optional[float]: float,
-                    Optional[bool]: bool,
+                    str: click.STRING,
+                    int: click.INT,
+                    float: click.FLOAT,
+                    bool: click.BOOL,
+                    Optional[str]: click.STRING,
+                    Optional[int]: click.INT,
+                    Optional[float]: click.FLOAT,
+                    Optional[bool]: click.BOOL,
                 }.get(type_hint, str)
 
             # Add a click option for each attribute
