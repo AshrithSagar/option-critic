@@ -12,8 +12,6 @@ import click
 import yaml
 
 from .config import (
-    ConfigEvalDefaults,
-    ConfigEvalProto,
     ConfigPlotsDefaults,
     ConfigPlotsProto,
     ConfigProto,
@@ -21,7 +19,6 @@ from .config import (
     ConfigRunProto,
 )
 from .constants import __root__
-from .evaluate import main as evaluate_main
 from .plots import main as plots_main
 from .run import main as run_main
 
@@ -129,15 +126,6 @@ def run(config_path: str, **kwargs):
     """Run an agent on an environment."""
     args = load_config(ConfigRunDefaults, config_path, verbose=True, **kwargs)
     run_main(args)
-
-
-@click.command()
-@config_options(ConfigEvalProto)
-@config_path
-def evaluate(config_path: str, **kwargs):
-    """Evaluate a trained agent."""
-    args = load_config(ConfigEvalDefaults, config_path, verbose=True, **kwargs)
-    evaluate_main(args)
 
 
 @click.command()

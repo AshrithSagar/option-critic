@@ -16,7 +16,7 @@ from torch.types import Tensor
 
 from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import to_tensor
-from ..utils.config import ConfigEvalProto, ConfigRunProto
+from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
 from ..utils.experience_replay import ReplayBuffer
 from ..utils.logger import OptionsLogger
@@ -338,7 +338,7 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
     env.close()
 
 
-def evaluate(args: ConfigEvalProto, env: gym.Env, **kwargs):
+def evaluate(args: ConfigRunProto, env: gym.Env, **kwargs):
     option_critic = OptionCriticConv if kwargs["is_atari"] else OptionCriticFeatures
     model = option_critic(
         in_features=env.observation_space.shape[0],
@@ -355,15 +355,16 @@ def evaluate(args: ConfigEvalProto, env: gym.Env, **kwargs):
     model.load_state_dict(checkpoint["model_params"])
     model.eval()
 
+    total_reward = 0
     for ep in range(args.num_episodes):
         obs, _ = env.reset()
         state = model.get_state(
             torch.tensor(obs, dtype=torch.float32, device=model.device)
         )
         term, trunc = False, False
-        total_reward = 0
 
-        while not (term or trunc):
+        ep_steps = 0
+        while not (term or trunc) and ep_steps < args.max_steps_ep:
             env.render()
             option = model.greedy_option(state)
             action, _, _ = model.get_action(state, option)
@@ -372,6 +373,10 @@ def evaluate(args: ConfigEvalProto, env: gym.Env, **kwargs):
             state = model.get_state(
                 torch.tensor(next_obs, dtype=torch.float32, device=model.device)
             )
-        print(f"Episode {ep + 1}: Total Reward = {total_reward}")
+            ep_steps += 1
+
+        print(
+            f"Episode {ep + 1} | Total Reward = {total_reward} | Reward = {reward} | Steps = {ep_steps}"
+        )
 
     env.close()

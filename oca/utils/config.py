@@ -38,6 +38,9 @@ class ConfigRunProto(ConfigProto):
     logdir: str  # Directory for logging statistics
     exp_name: Optional[str]  # Optional experiment name
     switch_goal: bool  # Switch goal after 2k eps
+    eval: bool  # Whether to evaluate the model or not
+    model_path: str  # Path to the model to evaluate
+    num_episodes: int  # Number of episodes to evaluate the model
 
 
 class ConfigRunDefaults(ConfigRunProto):
@@ -66,17 +69,9 @@ class ConfigRunDefaults(ConfigRunProto):
     logdir = runs_dir
     exp_name = None
     switch_goal = False
-
-
-class ConfigEvalProto(ConfigRunProto):
-    model_path: str  # Path to the model to evaluate
-    num_episodes: int  # Number of episodes to evaluate
-
-
-class ConfigEvalDefaults(ConfigRunDefaults):
-    model_path = ""
+    eval = False
+    model_path = None
     num_episodes = 10
-    render_mode = "human"
 
 
 class ConfigPlotsProto(ConfigProto):

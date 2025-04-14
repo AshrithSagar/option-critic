@@ -16,7 +16,7 @@ from torch import Tensor
 
 from ..envs.fourrooms import FourRoomsEnv
 from ..envs.utils import OneHotWrapper
-from ..utils.config import ConfigEvalProto, ConfigRunProto
+from ..utils.config import ConfigRunProto
 from ..utils.constants import models_dir
 from ..utils.logger import RegularLogger
 
@@ -149,5 +149,5 @@ def run(args: ConfigRunProto, env: gym.Env, **kwargs):
         logger.log_episode(ep, reward)
 
 
-def evaluate(args: ConfigEvalProto, env: gym.Env, **kwargs):
+def evaluate(args: ConfigRunProto, env: gym.Env, **kwargs):
     raise NotImplementedError

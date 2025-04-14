@@ -9,9 +9,9 @@ def get_agent_meth(meth: str, agent_name: str):
     if agent_name == "OptionCritic":
         from .option_critic import evaluate, run
     elif agent_name == "SARSA":
-        from .sarsa import run
+        from .sarsa import evaluate, run
     elif agent_name == "ACPG":
-        from .acpg import run
+        from .acpg import evaluate, run
     else:
         raise ValueError(f"Agent {agent_name} not found.")
 
