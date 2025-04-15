@@ -4,7 +4,13 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/AshrithSagar/option-critic)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-The Option-Critic Architecture
+Implementation of the Option-Critic Architecture | PyTorch
+
+[DOI](https://dl.acm.org/doi/10.5555/3298483.3298491)
+|
+[arXiv](https://arxiv.org/abs/1609.05140)
+|
+[Paper](https://ojs.aaai.org/index.php/AAAI/article/view/10916/10775)
 
 ## Installation
 
@@ -61,3 +67,6 @@ oca plot --run-name {run_name}
 ## References
 
 - <https://github.com/lweitkamp/option-critic-pytorch>
+- <https://pierrelucbacon.com/optioncritic-aaai2017-slides.pdf>
+- <https://pierrelucbacon.com/optioncriticposter.pdf>
+- <https://rll.berkeley.edu/deeprlworkshop/papers/BaconPrecup2015.pdf>
