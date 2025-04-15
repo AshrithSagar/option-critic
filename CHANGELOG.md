@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.2.3] - 2025-04-15
+
 ### Added
 
 - Save configs in `{runs_dir}/{run_name}`
@@ -52,7 +54,8 @@
 - Core functionality from <https://github.com/lweitkamp/option-critic-pytorch>
 - Setup, config and cli configured
 
-[unreleased]: https://github.com/AshrithSagar/option-critic/compare/v0.2.2...HEAD
+[unreleased]: https://github.com/AshrithSagar/option-critic/compare/v0.2.3...HEAD
+[v0.2.3]: https://github.com/AshrithSagar/option-critic/compare/v0.2.2...v0.2.3
 [v0.2.2]: https://github.com/AshrithSagar/option-critic/compare/v0.2.1...v0.2.2
 [v0.2.1]: https://github.com/AshrithSagar/option-critic/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/AshrithSagar/option-critic/compare/v0.1.0...v0.2.0
