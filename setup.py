@@ -25,5 +25,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     license="MIT",
-    python_requires=">=3.9",
+    python_requires=">=3.10",
 )
