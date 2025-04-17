@@ -21,6 +21,7 @@ Continuous-time Markov processes are a special case of it, where in the transiti
 
 It relaxes the condition that the time between option transitions must follow an exponential distribution.
 
+
 \subsection{Semi-Markov property and Options framework}
 
 Even though our problem is in discrete time space, when introducing options which are temporally extended, the time between transition from one option to another is not a constant.
@@ -48,9 +49,9 @@ Hence, we now deal with a state option pair.
 This ensures the Markov property holds for decision-making at the option level, enabling gradient-based learning for \( \theta, \vartheta \).
 In the Option-Critic architecture paper (1) they say that once the augmented process is considered, the expression for
 \begin{equation}
-    P(s_{t+1}, \omega_{t+1} \mid s_t, \omega_t)
-    =
-    \sum_{a} \pi_{\omega_t, \theta}(a \mid s_t) \ P(s_{t+1} \mid s_t, a) \, \Big( \big( 1 - \beta_{\omega_t, \vartheta}(s_{t+1}) \big) \mathbf{1}_{\omega_t = \omega_{t+1}} + \beta_{\omega_t, \vartheta}(s_{t+1}) \, \pi_\Omega(\omega_{t+1} \mid s_{t+1}) \Big)
+      P(s_{t+1}, \omega_{t+1} \mid s_t, \omega_t)
+      =
+      \sum_{a} \pi_{\omega_t, \theta}(a \mid s_t) \ P(s_{t+1} \mid s_t, a) \, \Big( \big( 1 - \beta_{\omega_t, \vartheta}(s_{t+1}) \big) \mathbf{1}_{\omega_t = \omega_{t+1}} + \beta_{\omega_t, \vartheta}(s_{t+1}) \, \pi_\Omega(\omega_{t+1} \mid s_{t+1}) \Big)
 \end{equation}
 shows that the process is homogeneous.
 Under the assumption that all options are available in all states and the termination probability at all states is non-zero, and with some mild conditions, the augmented process is also ergodic.
@@ -59,7 +60,13 @@ This helps to show convergence for policy gradient updates to a stable solution.
 \( Q \)-value is expressed for each option as a sum of discounted rewards within the option.
 The gradient of this \( Q \)-value is used to train for intra-option policy and termination function and not the total sum of discounted returns.
 
-Chapter 7 in ``A first Course in Stochastic Models'' (4), has proofs for convergence of the long-term average reward in sMDPs under a policy.
+For the option over policies, the Option-Critic architecture recommends to use existing techniques on like PGT at sMDP level.
+In the algorithm we have used simple epsilon soft policy over the learnt \( Q \)-values.
+The following results show the convergence of \( Q \) and \( V \) values for sMDPs.
+
+Chapter 8 of ``Markov Decision Processes'' by Martin L. Puterman. (5)
+
+Chapter 7 in ``A first Course in Stochastic Models'' (4).
 
 In addition, within an option, the termination function may be designed to depend on old data.
 For example, the termination function might be designed to terminate after a fixed number of steps, in which case it depends on how long the option has been active.
@@ -71,23 +78,27 @@ Hence given an option, the intra option policy and termination function can be l
 \section{References}
 
 \begin{enumerate}
-    \item The Option Critic Architecture
+      \item The Option Critic Architecture
 
-          \url{https://arxiv.org/abs/1609.05140}
-
-
-    \item Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning
-
-          \url{https://doi.org/10.1016/S0004-3702(99)00052-1}
+            \url{https://arxiv.org/abs/1609.05140}
 
 
-    \item continuous time markov
+      \item Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning
 
-          \url{https://www.youtube.com/watch?v=tbA2DnKTRxM&ab_channel=GarethTribello}
+            \url{https://doi.org/10.1016/S0004-3702(99)00052-1}
 
 
-    \item A first course on Stochastic Models
+      \item continuous time markov
 
-          \url{https://www.ctanujit.org/uploads/2/5/3/9/25393293/_a_first_course_in_stochastic_models_by_darksiderg.pdf}
+            \url{https://www.youtube.com/watch?v=tbA2DnKTRxM&ab_channel=GarethTribello}
+
+
+      \item A first course on Stochastic Models
+
+            \url{https://www.ctanujit.org/uploads/2/5/3/9/25393293/_a_first_course_in_stochastic_models_by_darksiderg.pdf}
+
+      \item Markov Decision Processes, by Martin L. Puterman.
+
+            \url{https://www.scribd.com/document/340039168/Markov-Decision-Processes}
 
 \end{enumerate}
