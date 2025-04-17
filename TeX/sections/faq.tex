@@ -1,0 +1,93 @@
+\section{FAQs}
+
+\subsection{What is a semi-Markovian process?}
+
+Markov property is usually defined as the property that ``the future evolution of a stochastic process depends only on its current state and not on its past history''.
+
+When this applies to continuous-time systems, we have an additional concern.
+In continuous time Markov processes, the transit times from one state to its next are not at a fixed discrete step, it can be at any time in the continuous time range.
+The time spent in a state will hence be a random variable.
+To conserve the memoryless property of Markov chain, i.e., the next state should not depend on any information except the current state, the distribution of this random variable (transition time) must be exponential (because of the memorylessness property of exponential distribution).
+
+In a semi-Markovian process, this condition is relaxed.
+The time duration between state transitions does not have to follow an exponential distribution but can be any arbitrary distribution.
+
+But semi-Markovian processes still have to follow the criteria that at the transition points, the next state depends only on the present state and thus independent of the past history of the system.
+
+In essence, a semi-Markov process is a stochastic process which follows the Markov property, and the transition times can be from any distribution.
+Continuous-time Markov processes are a special case of it, where in the transition times are restricted to follow an exponential distribution.
+
+\subsubsection{What conditions of Markovian process does it relax?}
+
+It relaxes the condition that the time between transitions of options must follow an exponential distribution.
+
+\subsection{Semi-Markov property and Options framework}
+
+Even though our problem is in discrete time space, when introducing options which are temporally extended, the time between transition from one option to another is not a constant.
+This transition time is determined by the termination function beta.
+As we don’t restrict beta to any distribution, it might not possess the memorylessness property.
+
+Note: The transit time from one option to another is always discrete (has to be an integer) but this is just a special case of variable real intervals mentioned above.
+Hence, options make the process semi-MDP.\@
+
+Theorem 1 in Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning (R Sutton et al. 1999) (2) says
+
+\textbf{Theorem 1 (MDP+ Options = sMDP)}: For any MDP, and any set of options defined on that MDP, the decision process that selects only among those options, executing each to termination, is an sMDP.\@
+
+When viewed at the state-option pairs level, the process is Markovian, but it is not Markovian when viewed at the state-action pairs level.
+
+
+\subsection{Semi-MDP in Option-Critic architecture}
+
+The semi-Markov property can come into play at 2 levels in the option-critic architecture.
+
+First, the introduction of options into an MDP makes the decision process at the option level Semi MDP as mentioned above, because the distribution of time between decisions is not necessarily memoryless.
+
+The Option-Critic architecture considers an augmented process i.e., the MDPs state space is augmented to include the currently active option.
+Hence, we now deal with a state option pair.
+This ensures the Markov property holds for decision-making at the option level, enabling gradient-based learning for \( \theta, \vartheta \).
+In the Option-Critic architecture paper (1) they say that once the augmented process is considered, the expression for
+\begin{equation}
+    P(s_{t+1}, \omega_{t+1} \mid s_t, \omega_t)
+    =
+    \sum_{a} \pi_{\omega_t, \theta}(a \mid s_t) \ P(s_{t+1} \mid s_t, a) \, \Big( \big( 1 - \beta_{\omega_t, \vartheta}(s_{t+1}) \big) \mathbf{1}_{\omega_t = \omega_{t+1}} + \beta_{\omega_t, \vartheta}(s_{t+1}) \, \pi_\Omega(\omega_{t+1} \mid s_{t+1}) \Big)
+\end{equation}
+shows that the process is homogeneous.
+Under the assumption that all options are available in all states and the termination probability at all states is non-zero, and with some mild conditions, the augmented process is also ergodic.
+This helps to show convergence for policy gradient updates to a stable solution.
+
+\( Q \)-value is expressed for each option as a sum of discounted rewards within the option.
+The gradient of this \( Q \)-value is used to train for intra-option policy and termination function and not the total sum of discounted returns.
+
+Chap 7 in “A first Course in Stochastic Models” (4), has proofs for convergence of the long-term average reward in sMDPs under a policy.
+
+In addition, within an option, the termination function may be designed to depend on old data.
+For example, the termination function might be designed to terminate after a fixed number of steps, in which case, it depends on the time for which the option has been running.
+This makes the policy within an option also semi-Markovian.
+We don't allow for such cases, as in the paper on option critic architecture, all options are considered to be Markovian, i.e., both the intra option policy and the termination function only depends on the current state and option.
+Hence given an option, the intra option policy and termination function can be learnt in a Markovian way.
+
+
+\section{References}
+
+\begin{enumerate}
+    \item The Option Critic Architecture
+
+          \url{https://arxiv.org/abs/1609.05140https://arxiv.org/abs/1609.05140}
+
+
+    \item Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning
+
+          \url{https://doi.org/10.1016/S0004-3702(99)00052-1}
+
+
+    \item continuous time markov
+
+          \url{https://www.youtube.com/watch?v=tbA2DnKTRxM&ab_channel=GarethTribello}
+
+
+    \item A first course on Stochastic Models
+
+          \url{https://www.ctanujit.org/uploads/2/5/3/9/25393293/_a_first_course_in_stochastic_models_by_darksiderg.pdf}
+
+\end{enumerate}
